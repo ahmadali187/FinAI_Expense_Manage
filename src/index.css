@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Josefin Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+input,
+button,
+textarea,
+select {
+  font-family: inherit; 
+}
+
+/* Styles for input fields with icons */
+.input-with-icon {
+  display: flex; /* Use flexbox to align icon and input */
+  align-items: center; /* Vertically align items */
+  margin-bottom: 1rem; /* Add some space below the group, adjust as needed */
+}
+
+.input-with-icon .input-icon {
+  /* Icon is now a flex item, not absolutely positioned */
+  margin-right: 10px; /* Space between icon and input box */
+  color: #888; /* Icon color */
+  font-size: 1.2em; /* Adjust size as needed for external icon */
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.input-with-icon input {
+  /* Input takes remaining space */
+  flex-grow: 1;
+  padding: 0.5em; /* Standard padding, no extra for internal icon */
+  width: 100%; /* Let flexbox handle width distribution */
+  box-sizing: border-box;
+  /* Remove position:relative if not needed for other reasons */
+}
+
+/* Adjustments for password field if it has a toggle button */
+/* The .password-input-container itself is now a flex item if it's a child of .input-with-icon */
+
+.password-input-container { /* This is the original div that has input and button */
+  position: relative; /* Keep this for the toggle button positioning */
+  display: flex; /* Make its children (input, button) align well */
+  flex-grow: 1; /* Allow it to take available space */
+}
+
+.password-input-container input {
+  /* This input is inside .password-input-container, which is inside .input-with-icon */
+  padding-right: 40px; /* Space for the toggle button */
+  /* padding-left will be the default from .input-with-icon input if not overridden */
+}
+
+.password-input-container .toggle-password-btn {
+  position: absolute; /* Position toggle button within its relative container */
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* Barba.js Fade Transition */
+.fade-leave-active,
+.fade-enter-active {
+  transition: opacity 0.5s ease-in-out;
+}
+.fade-leave-to, 
+.fade-enter-from {
+  opacity: 0;
+}
+ 
+
+/* Social Login Buttons */
+.social-login-options {
+  margin-top: 1.5rem;
+}
+
+.social-login-options .text-center {
+  margin-bottom: 0.75rem;
+  color: #555;
+}
+
+.social-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Adds space between buttons */
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-size: 0.9rem;
+  min-width: 120px; /* Ensure buttons have a decent minimum width */
+}
+
+.btn-social svg {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.btn-social:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-social.btn-google {
+  /* Specific styles for Google button if needed */
+}
+
+.btn-social.btn-google:hover {
+  border-color: #ccc;
+  background-color: #f1f1f1;
+}
+
+
+.btn-social.btn-apple {
+  /* Specific styles for Apple button if needed */
+}
+
+.btn-social.btn-apple:hover {
+  border-color: #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Ensure d-flex and justify-content-center are available if not using Bootstrap globally */
+.d-flex {
+  display: flex !important;
+}
+
+.justify-content-center {
+  justify-content: center !important;
+}
+
+.m-1 {
+  margin: 0.25rem !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}

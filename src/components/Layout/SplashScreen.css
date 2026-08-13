@@ -1,0 +1,17 @@
+.splash-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999; 
+}
+
+.splash-icon {
+  width: 150px; 
+  height: 150px; 
+}
