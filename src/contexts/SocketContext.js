@@ -3,9 +3,18 @@ import { io } from 'socket.io-client';
 
 export const SocketContext = createContext();
 
-const API_HOST = process.env.REACT_APP_API_URL 
-  ? process.env.REACT_APP_API_URL.replace('/api', '')
-  : 'http://localhost:5000';
+const getSocketHost = () => {
+  const envUrl = process.env.REACT_APP_API_URL || 
+                 process.env.VITE_API_URL || 
+                 process.env.REACT_APP_API_BASE_URL || 
+                 process.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/api\/?$/, '');
+  }
+  return 'http://localhost:5000';
+};
+
+const API_HOST = getSocketHost();
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);

@@ -38,11 +38,14 @@ from services.cash_flow_forecast import calculate_cash_flow_forecast
 from services.subscription_detector import detect_recurring_subscriptions
 from services.admin_copilot import answer_admin_copilot, get_admin_stats
 
-cors_origins_env = os.environ.get('CORS_ALLOWED_ORIGINS', '*').strip()
-allowed_origins = [o.strip() for o in cors_origins_env.split(',')] if cors_origins_env != '*' else '*'
+cors_origins_env = os.environ.get('CORS_ALLOWED_ORIGINS', '').strip()
+if cors_origins_env and cors_origins_env != '*':
+    allowed_origins = [o.strip() for o in cors_origins_env.split(',') if o.strip()]
+else:
+    allowed_origins = '*'
 
 app = Flask(__name__)
-CORS(app, origins=allowed_origins)
+CORS(app, origins=allowed_origins, supports_credentials=True)
 
 SECRET_KEY = JWT_SECRET
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -127,11 +130,20 @@ with app.app_context():
 
 @app.route('/')
 def index():
+    render_url = os.environ.get('RENDER_EXTERNAL_URL')
+    env_api_url = os.environ.get('BACKEND_PUBLIC_URL') or os.environ.get('REACT_APP_API_URL') or os.environ.get('VITE_API_URL')
+    if render_url:
+        api_base_url = f"{render_url.rstrip('/')}/api"
+    elif env_api_url:
+        api_base_url = env_api_url if env_api_url.endswith('/api') else f"{env_api_url.rstrip('/')}/api"
+    else:
+        api_base_url = request.host_url.rstrip('/') + '/api'
+
     return jsonify({
         'status': 'online',
         'service': 'FinAI — AI Personal Finance Copilot REST API',
         'version': '1.0.0',
-        'api_base_url': 'http://localhost:5000/api'
+        'api_base_url': api_base_url
     })
 
 # --- Auth Token Middleware ---

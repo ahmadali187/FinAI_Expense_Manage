@@ -1,5 +1,16 @@
 // Centralized API Client for Python Flask Backend & SQLite Database
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const getApiBaseUrl = () => {
+  const envUrl = process.env.REACT_APP_API_URL || 
+                 process.env.VITE_API_URL || 
+                 process.env.REACT_APP_API_BASE_URL || 
+                 process.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('finai_auth_token');
