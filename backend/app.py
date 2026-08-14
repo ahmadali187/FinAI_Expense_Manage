@@ -89,6 +89,42 @@ def emit_user_event(user_id, event_type, entity_id=None):
     except Exception as e:
         print("Socket event emission failed:", e)
 
+def ensure_admin_user():
+    admin_email = os.environ.get('ADMIN_EMAIL')
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+
+    if not admin_email or not admin_password:
+        print("[ADMIN] ADMIN_EMAIL or ADMIN_PASSWORD environment variables not set.")
+        return
+
+    email = admin_email.strip().lower()
+    password = admin_password.strip()
+
+    try:
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.role = 'admin'
+            user.is_active = True
+            if password:
+                user.password_hash = password
+            db.session.commit()
+            print(f"[ADMIN] Existing user '{email}' successfully promoted/updated to Superuser Admin.")
+        else:
+            admin_user = User(
+                name='FinAI System Admin',
+                email=email,
+                password_hash=password,
+                auth_provider='email',
+                role='admin',
+                is_active=True
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            print(f"[ADMIN] New Superuser Admin '{email}' created successfully.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"[ADMIN] Automatic admin initialization error: {e}")
+
 db.init_app(app)
 
 with app.app_context():
@@ -127,6 +163,8 @@ with app.app_context():
             conn.commit()
     except Exception as e:
         print("SQLite auto-migration info:", e)
+
+    ensure_admin_user()
 
 @app.route('/')
 def index():
