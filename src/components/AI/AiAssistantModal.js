@@ -1,5 +1,6 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { FaRobot, FaPaperPlane, FaTimes, FaLightbulb, FaCheck, FaCalculator } from 'react-icons/fa';
+import { FaPaperPlane, FaLightbulb, FaCheck, FaCalculator } from 'react-icons/fa';
+import ModalPortal from '../common/ModalPortal';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { BudgetsContext } from '../../contexts/BudgetsContext';
 import * as api from '../../services/api';
@@ -17,6 +18,11 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
   ]);
   const [loading, setLoading] = useState(false);
   const [showBreakdownIdx, setShowBreakdownIdx] = useState(null);
+  const [quickPrompts, setQuickPrompts] = useState([
+    "What is my net balance?",
+    "Where am I spending the most?",
+    "Can I afford a ₹15,000 purchase?"
+  ]);
 
   const messagesEndRef = useRef(null);
 
@@ -27,6 +33,18 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) scrollToBottom();
   }, [messages, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      api.getAiQuickQuestions()
+        .then(res => {
+          if (res && Array.isArray(res.questions) && res.questions.length > 0) {
+            setQuickPrompts(res.questions);
+          }
+        })
+        .catch(err => console.error('Failed to load dynamic AI questions:', err));
+    }
+  }, [isOpen]);
 
   const handleSend = async (queryOverride) => {
     const queryToSend = typeof queryOverride === 'string' ? queryOverride : input;
@@ -79,157 +97,121 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const [quickPrompts, setQuickPrompts] = useState([
-    "What is my net balance?",
-    "Where am I spending the most?",
-    "Can I afford a ₹15,000 purchase?"
-  ]);
-
-  useEffect(() => {
-    if (isOpen) {
-      api.getAiQuickQuestions()
-        .then(res => {
-          if (res && Array.isArray(res.questions) && res.questions.length > 0) {
-            setQuickPrompts(res.questions);
-          }
-        })
-        .catch(err => console.error('Failed to load dynamic AI questions:', err));
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
-      <div className="modal-glass-container" style={{ maxWidth: '560px', background: '#0f172a', border: '1px solid rgba(99, 102, 241, 0.4)' }} onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-              <FaRobot size={20} />
+    <ModalPortal isOpen={isOpen} onClose={onClose} title="FinAI Financial Assistant" maxWidth="560px">
+      <div className="space-y-4">
+        {/* Messages List */}
+        <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+          {messages.map((m, idx) => (
+            <div
+              key={idx}
+              className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed max-w-[88%] ${
+                m.sender === 'user'
+                  ? 'bg-indigo-600 text-white ml-auto rounded-br-xs shadow-md'
+                  : 'bg-slate-800/90 border border-slate-700/70 text-slate-200 mr-auto rounded-bl-xs shadow-md'
+              }`}
+            >
+              <div className="whitespace-pre-line">{m.text}</div>
+
+              {/* Source/Calculation Breakdown Toggle */}
+              {(m.breakdown || m.classification === 'CALCULATION' || m.classification === 'RECOMMENDATION') && m.sender === 'ai' && (
+                <div className="mt-2 pt-2 border-t border-slate-700/50">
+                  <button
+                    onClick={() => setShowBreakdownIdx(showBreakdownIdx === idx ? null : idx)}
+                    className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <FaCalculator className="text-xs" /> {showBreakdownIdx === idx ? 'Hide breakdown' : 'View calculation details'}
+                  </button>
+                  {showBreakdownIdx === idx && (
+                    <div className="mt-2 bg-slate-900/90 p-3 rounded-xl border border-indigo-500/30 text-xs space-y-1.5 text-slate-300">
+                      <div><strong className="text-white">Type:</strong> {m.classification}</div>
+                      {m.breakdown && (
+                        <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
+                          <div>Balance: ₹{m.breakdown.current_balance?.toLocaleString('en-IN')}</div>
+                          <div>Commitments: ₹{m.breakdown.upcoming_commitments?.toLocaleString('en-IN')}</div>
+                          <div>Available: ₹{m.breakdown.estimated_available_amount?.toLocaleString('en-IN')}</div>
+                          <div>Purchase: ₹{m.breakdown.purchase_amount?.toLocaleString('en-IN')}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Contextual Action Buttons */}
+              {m.actions && m.actions.length > 0 && m.sender === 'ai' && (
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {m.actions.map((act, aIdx) => (
+                    <button
+                      key={aIdx}
+                      onClick={() => handleActionClick(act)}
+                      className="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 rounded-lg text-xs font-medium transition"
+                    >
+                      {act.label} →
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* AI Proposed Action Card */}
+              {m.proposal && !m.proposalConfirmed && (
+                <div className="mt-3 p-3 bg-slate-900/90 border border-emerald-500/40 rounded-xl space-y-2">
+                  <div className="text-xs font-bold text-emerald-400">AI Proposed Action</div>
+                  <button
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5"
+                    onClick={() => handleConfirmProposal(m.proposal, idx)}
+                    disabled={loading}
+                  >
+                    <FaCheck /> Confirm & Execute
+                  </button>
+                </div>
+              )}
+              {m.proposalConfirmed && (
+                <div className="mt-2 text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  ✓ Executed successfully in database
+                </div>
+              )}
             </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>FinAI Advisor</h3>
-              <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                ● Connected • SQLite Database Grounded
-              </span>
-            </div>
-          </div>
-          <FaTimes style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={onClose} />
+          ))}
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="modal-body">
-          <div className="chat-messages" style={{ maxHeight: '360px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {messages.map((m, idx) => (
-              <div key={idx} className={`chat-bubble ${m.sender === 'user' ? 'chat-user' : 'chat-ai'}`}>
-                <div style={{ whiteSpace: 'pre-line' }}>{m.text}</div>
-
-                {/* Optional Source/Calculation Breakdown Toggle */}
-                {(m.breakdown || m.classification === 'CALCULATION' || m.classification === 'RECOMMENDATION') && m.sender === 'ai' && (
-                  <div style={{ marginTop: '8px' }}>
-                    <button
-                      onClick={() => setShowBreakdownIdx(showBreakdownIdx === idx ? null : idx)}
-                      style={{ background: 'transparent', border: 'none', color: '#818cf8', fontSize: '0.75rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: 0 }}
-                    >
-                      <FaCalculator size={11} /> {showBreakdownIdx === idx ? 'Hide source details' : 'View calculation source'}
-                    </button>
-                    {showBreakdownIdx === idx && (
-                      <div style={{ marginTop: '6px', background: 'rgba(15, 23, 42, 0.8)', padding: '8px 12px', borderRadius: '6px', fontSize: '0.75rem', color: '#cbd5e1', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-                        <div><strong>Type:</strong> {m.classification}</div>
-                        {m.breakdown && (
-                          <div style={{ marginTop: '4px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-                            <div>Net Balance: ₹{m.breakdown.current_balance?.toLocaleString()}</div>
-                            <div>Commitments: ₹{m.breakdown.upcoming_commitments?.toLocaleString()}</div>
-                            <div>Available: ₹{m.breakdown.estimated_available_amount?.toLocaleString()}</div>
-                            <div>Purchase: ₹{m.breakdown.purchase_amount?.toLocaleString()}</div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Render Contextual Action Buttons */}
-                {m.actions && m.actions.length > 0 && m.sender === 'ai' && (
-                  <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {m.actions.map((act, aIdx) => (
-                      <button
-                        key={aIdx}
-                        onClick={() => handleActionClick(act)}
-                        style={{ background: 'rgba(99, 102, 241, 0.2)', border: '1px solid #818cf8', color: '#fff', borderRadius: '12px', padding: '3px 8px', fontSize: '0.72rem', cursor: 'pointer' }}
-                      >
-                        {act.label} →
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* AI Proposed Action Card */}
-                {m.proposal && !m.proposalConfirmed && (
-                  <div style={{ marginTop: '10px', background: 'rgba(15, 23, 42, 0.8)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700, marginBottom: '6px' }}>AI Proposed Action</div>
-                    <button
-                      className="btn-gradient-primary"
-                      style={{ padding: '4px 10px', fontSize: '0.75rem', background: '#10b981' }}
-                      onClick={() => handleConfirmProposal(m.proposal, idx)}
-                      disabled={loading}
-                    >
-                      <FaCheck /> Confirm & Execute
-                    </button>
-                  </div>
-                )}
-                {m.proposalConfirmed && (
-                  <div style={{ marginTop: '6px', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
-                    ✓ Confirmed & Executed in SQLite
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick Prompts Bar */}
-          <div style={{ margin: '14px 0 10px 0', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {quickPrompts.map((prompt, i) => (
-              <button
-                key={i}
-                onClick={() => handleSend(prompt)}
-                disabled={loading}
-                style={{
-                  background: 'rgba(99, 102, 241, 0.12)',
-                  border: '1px solid rgba(99, 102, 241, 0.25)',
-                  color: '#ffffff',
-                  padding: '4px 8px',
-                  borderRadius: '12px',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <FaLightbulb color="#f59e0b" size={10} /> {prompt}
-              </button>
-            ))}
-          </div>
-
-          {/* Input Form */}
-          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '8px' }}>
-            <input
-              type="text"
-              className="glass-input"
-              style={{ background: '#1e293b', color: '#ffffff' }}
-              placeholder="Ask FinAI financial questions..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
+        {/* Dynamic Quick Prompt Chips */}
+        <div className="flex flex-wrap gap-1.5 py-1">
+          {quickPrompts.map((prompt, i) => (
+            <button
+              key={i}
+              onClick={() => handleSend(prompt)}
               disabled={loading}
-            />
-            <button type="submit" className="btn-gradient-primary" style={{ padding: '0 18px' }} disabled={loading || !input.trim()}>
-              <FaPaperPlane />
+              className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-200 text-xs rounded-xl transition flex items-center gap-1.5"
+            >
+              <FaLightbulb className="text-amber-400 text-xs" /> {prompt}
             </button>
-          </form>
+          ))}
         </div>
+
+        {/* Input Form */}
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2 pt-1">
+          <input
+            type="text"
+            className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+            placeholder="Ask FinAI about your cashflow, budgets..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading || !input.trim()}
+            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center"
+          >
+            <FaPaperPlane className="text-sm" />
+          </button>
+        </form>
       </div>
-    </div>
+    </ModalPortal>
   );
 };
 

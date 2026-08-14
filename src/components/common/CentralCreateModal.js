@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FiX, FiMinusCircle, FiPlusCircle } from 'react-icons/fi';
+import { FiMinusCircle, FiPlusCircle } from 'react-icons/fi';
+import ModalPortal from './ModalPortal';
 import AddTransactionModal from '../Dashboard/AddTransactionModal';
 
 const CentralCreateModal = ({ isOpen, onClose, onTransactionAdded }) => {
@@ -26,45 +27,35 @@ const CentralCreateModal = ({ isOpen, onClose, onTransactionAdded }) => {
           onTransactionAdded={onTransactionAdded}
         />
       ) : (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+        <ModalPortal isOpen={isOpen} onClose={onClose} title="Add Transaction" maxWidth="440px">
+          <div className="text-center mb-6">
+            <p className="text-sm text-slate-400">What record type would you like to add?</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition"
+              onClick={() => handleSelectType('expense')}
+              className="flex flex-col items-center justify-center p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-2xl transition group cursor-pointer shadow-lg"
             >
-              <FiX className="w-5 h-5" />
+              <div className="w-14 h-14 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <FiMinusCircle className="w-7 h-7" />
+              </div>
+              <span className="font-bold text-red-400 text-base mb-1">+ Add Expense</span>
+              <span className="text-xs text-slate-400">Outflow record</span>
             </button>
 
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-white mb-1">Add Transaction</h2>
-              <p className="text-sm text-slate-400">Select transaction type to record</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => handleSelectType('expense')}
-                className="flex flex-col items-center justify-center p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl transition group"
-              >
-                <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                  <FiMinusCircle className="w-6 h-6" />
-                </div>
-                <span className="font-semibold text-red-400 text-base mb-1">+ Add Expense</span>
-                <span className="text-xs text-slate-400">Outflow record</span>
-              </button>
-
-              <button
-                onClick={() => handleSelectType('income')}
-                className="flex flex-col items-center justify-center p-6 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition group"
-              >
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                  <FiPlusCircle className="w-6 h-6" />
-                </div>
-                <span className="font-semibold text-emerald-400 text-base mb-1">+ Add Income</span>
-                <span className="text-xs text-slate-400">Inflow record</span>
-              </button>
-            </div>
+            <button
+              onClick={() => handleSelectType('income')}
+              className="flex flex-col items-center justify-center p-6 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 rounded-2xl transition group cursor-pointer shadow-lg"
+            >
+              <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <FiPlusCircle className="w-7 h-7" />
+              </div>
+              <span className="font-bold text-emerald-400 text-base mb-1">+ Add Income</span>
+              <span className="text-xs text-slate-400">Inflow record</span>
+            </button>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </>
   );

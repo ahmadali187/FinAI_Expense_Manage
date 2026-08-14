@@ -20,6 +20,7 @@ import ReceiptScannerModal from '../AI/ReceiptScannerModal';
 import QuickAddExpenseModal from '../AI/QuickAddExpenseModal';
 import CsvImportModal from '../Finance/CsvImportModal';
 import NotificationCenter from '../Notifications/NotificationCenter';
+import AffordabilityCard from '../AI/AffordabilityCard';
 
 import { analyzeSpendingAnomalies } from '../../utils/aiEngine';
 import { exportTransactionsToCSV, generatePDFStatement } from '../../utils/exportService';
@@ -200,6 +201,9 @@ const Dashboard = () => {
       {dashboardData?.safe_to_spend && (
         <SafeToSpendCard safeToSpendData={dashboardData.safe_to_spend} />
       )}
+
+      {/* FinAI Purchase Affordability Calculator */}
+      <AffordabilityCard />
 
       {/* 3. What Changed Intelligence Widget */}
       <WhatChangedWidget transactions={transactions} />
