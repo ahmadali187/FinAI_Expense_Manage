@@ -11,7 +11,6 @@ const ProfilePage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState({ type: '', content: '' });
-  const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPasswordInput, setShowCurrentPasswordInput] = useState(false);
   const [showNewPasswordInput, setShowNewPasswordInput] = useState(false);
   const [showConfirmPasswordInput, setShowConfirmPasswordInput] = useState(false);
@@ -62,16 +61,9 @@ const ProfilePage = () => {
       <div className="profile-info">
         <p><strong>Name:</strong> {loggedInUser.name}</p>
         <p><strong>Email:</strong> {loggedInUser.email}</p>
+        <p><strong>Role:</strong> {loggedInUser.role || 'user'}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-          <strong>Password:</strong> <span>{showPassword ? loggedInUser.password : '••••••••'}</span>
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="btn-glass-secondary"
-            style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
+          <strong>Password:</strong> <span>••••••••</span>
         </div>
       </div>
 

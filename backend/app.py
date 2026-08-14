@@ -160,6 +160,19 @@ with app.app_context():
             if 'is_active' not in user_columns:
                 conn.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1"))
 
+            # Account columns migration
+            acc_columns = [row[1] for row in conn.execute(text("PRAGMA table_info(accounts)")).fetchall()]
+            if 'institution_name' not in acc_columns:
+                conn.execute(text("ALTER TABLE accounts ADD COLUMN institution_name VARCHAR(120)"))
+            if 'last_four' not in acc_columns:
+                conn.execute(text("ALTER TABLE accounts ADD COLUMN last_four VARCHAR(10)"))
+            if 'color' not in acc_columns:
+                conn.execute(text("ALTER TABLE accounts ADD COLUMN color VARCHAR(20) DEFAULT '#3B82F6'"))
+            if 'icon' not in acc_columns:
+                conn.execute(text("ALTER TABLE accounts ADD COLUMN icon VARCHAR(50) DEFAULT 'wallet'"))
+            if 'is_archived' not in acc_columns:
+                conn.execute(text("ALTER TABLE accounts ADD COLUMN is_archived BOOLEAN DEFAULT 0"))
+
             conn.commit()
     except Exception as e:
         print("SQLite auto-migration info:", e)
@@ -265,15 +278,7 @@ def register():
     user = User(name=name, email=email, password_hash=password, auth_provider='email')
     db.session.add(user)
     db.session.commit()
-
-    # Default Accounts
-    db.session.add_all([
-        Account(user_id=user.id, name='Primary Savings Bank', type='Bank', current_balance=25000.0),
-        Account(user_id=user.id, name='Cash Wallet', type='Cash', current_balance=3500.0),
-        Account(user_id=user.id, name='Credit Card', type='Credit Card', current_balance=-8500.0)
-    ])
-    db.session.commit()
-    log_activity(user.id, 'User account registered and default wallets created')
+    log_activity(user.id, 'User account registered')
 
     token = generate_user_token(user)
     return jsonify({'token': token, 'user': user.to_dict()})
@@ -321,11 +326,6 @@ def google_auth():
         )
         db.session.add(user)
         db.session.commit()
-        db.session.add_all([
-            Account(user_id=user.id, name='Google Primary Bank', type='Bank', current_balance=35000.0),
-            Account(user_id=user.id, name='Cash Wallet', type='Cash', current_balance=5000.0)
-        ])
-        db.session.commit()
 
     token = generate_user_token(user)
     log_activity(user.id, 'Logged in via Google OAuth')
@@ -366,16 +366,27 @@ def change_password(current_user):
 @token_required
 def manage_accounts(current_user):
     if request.method == 'GET':
-        accounts = Account.query.filter_by(user_id=current_user.id).all()
+        include_archived = request.args.get('include_archived', '').lower() == 'true'
+        if include_archived:
+            accounts = Account.query.filter_by(user_id=current_user.id).all()
+        else:
+            accounts = Account.query.filter_by(user_id=current_user.id, is_archived=False).all()
         return jsonify([a.to_dict() for a in accounts])
 
     data = request.get_json() or {}
+    opening_bal = float(data.get('opening_balance', 0))
+    current_bal = float(data.get('current_balance', opening_bal))
+
     acc = Account(
         user_id=current_user.id,
         name=data.get('name', 'New Account'),
         type=data.get('type', 'Bank'),
-        opening_balance=float(data.get('opening_balance', 0)),
-        current_balance=float(data.get('current_balance', 0)),
+        institution_name=data.get('institution_name', ''),
+        last_four=data.get('last_four', ''),
+        color=data.get('color', '#3B82F6'),
+        icon=data.get('icon', 'wallet'),
+        opening_balance=opening_bal,
+        current_balance=current_bal,
         currency=data.get('currency', 'INR'),
         notes=data.get('notes', '')
     )
@@ -383,6 +394,93 @@ def manage_accounts(current_user):
     db.session.commit()
     log_activity(current_user.id, f"Created account '{acc.name}'")
     emit_user_event(current_user.id, 'account.created', acc.id)
+    return jsonify(acc.to_dict())
+
+@app.route('/api/accounts/<int:acc_id>', methods=['PUT', 'DELETE'])
+@token_required
+def single_account(current_user, acc_id):
+    acc = Account.query.filter_by(id=acc_id, user_id=current_user.id).first()
+    if not acc:
+        return jsonify({'message': 'Account not found or access denied'}), 404
+
+    if request.method == 'PUT':
+        data = request.get_json() or {}
+        acc.name = data.get('name', acc.name)
+        acc.type = data.get('type', acc.type)
+        if 'institution_name' in data:
+            acc.institution_name = data.get('institution_name')
+        if 'last_four' in data:
+            acc.last_four = data.get('last_four')
+        if 'color' in data:
+            acc.color = data.get('color')
+        if 'icon' in data:
+            acc.icon = data.get('icon')
+        if 'opening_balance' in data:
+            diff = float(data.get('opening_balance')) - acc.opening_balance
+            acc.opening_balance = float(data.get('opening_balance'))
+            acc.current_balance += diff
+        if 'current_balance' in data and 'opening_balance' not in data:
+            acc.current_balance = float(data.get('current_balance'))
+        if 'notes' in data:
+            acc.notes = data.get('notes')
+        if 'currency' in data:
+            acc.currency = data.get('currency')
+
+        db.session.commit()
+        log_activity(current_user.id, f"Updated account '{acc.name}'")
+        emit_user_event(current_user.id, 'account.updated', acc.id)
+        return jsonify(acc.to_dict())
+
+    # DELETE Logic
+    tx_count = Transaction.query.filter_by(user_id=current_user.id, account_id=acc.id).count()
+    action = request.args.get('action') or (request.get_json() or {}).get('action')
+
+    if tx_count > 0 and action not in ['delete_all', 'archive', 'true', 'force']:
+        return jsonify({
+            'has_transactions': True,
+            'transaction_count': tx_count,
+            'message': f"This account has {tx_count} transaction{'s' if tx_count > 1 else ''}.",
+            'can_archive': True
+        }), 400
+
+    if action == 'archive':
+        acc.is_archived = True
+        db.session.commit()
+        log_activity(current_user.id, f"Archived account '{acc.name}'")
+        emit_user_event(current_user.id, 'account.archived', acc.id)
+        return jsonify({'message': f"Account '{acc.name}' archived successfully.", 'account': acc.to_dict()})
+
+    if action in ['delete_all', 'true', 'force']:
+        Transaction.query.filter_by(user_id=current_user.id, account_id=acc.id).delete()
+
+    db.session.delete(acc)
+    db.session.commit()
+    log_activity(current_user.id, f"Deleted account '{acc.name}'")
+    emit_user_event(current_user.id, 'account.deleted', acc_id)
+    return jsonify({'success': True, 'message': 'Account deleted successfully.'})
+
+@app.route('/api/accounts/<int:acc_id>/archive', methods=['PUT'])
+@token_required
+def archive_account(current_user, acc_id):
+    acc = Account.query.filter_by(id=acc_id, user_id=current_user.id).first()
+    if not acc:
+        return jsonify({'message': 'Account not found or access denied'}), 404
+    acc.is_archived = True
+    db.session.commit()
+    log_activity(current_user.id, f"Archived account '{acc.name}'")
+    emit_user_event(current_user.id, 'account.archived', acc_id)
+    return jsonify(acc.to_dict())
+
+@app.route('/api/accounts/<int:acc_id>/restore', methods=['PUT'])
+@token_required
+def restore_account(current_user, acc_id):
+    acc = Account.query.filter_by(id=acc_id, user_id=current_user.id).first()
+    if not acc:
+        return jsonify({'message': 'Account not found or access denied'}), 404
+    acc.is_archived = False
+    db.session.commit()
+    log_activity(current_user.id, f"Restored account '{acc.name}'")
+    emit_user_event(current_user.id, 'account.restored', acc_id)
     return jsonify(acc.to_dict())
 
 # --- DASHBOARD ENDPOINT ---
@@ -483,26 +581,191 @@ def manage_transactions(current_user):
     emit_user_event(current_user.id, 'transaction.created', tx.id)
     return jsonify(tx.to_dict())
 
-@app.route('/api/transactions/<int:tx_id>', methods=['DELETE'])
+@app.route('/api/transactions/<int:tx_id>', methods=['PUT', 'DELETE'])
 @token_required
-def delete_transaction(current_user, tx_id):
+def single_transaction(current_user, tx_id):
     tx = Transaction.query.filter_by(id=tx_id, user_id=current_user.id).first()
     if not tx:
         return jsonify({'message': 'Transaction not found or access denied'}), 404
-    
-    if tx.account_id:
-        acc = Account.query.filter_by(id=tx.account_id, user_id=current_user.id).first()
-        if acc:
-            if tx.type == 'income':
-                acc.current_balance -= tx.amount
-            else:
-                acc.current_balance += tx.amount
 
-    db.session.delete(tx)
+    if request.method == 'DELETE':
+        if tx.account_id:
+            acc = Account.query.filter_by(id=tx.account_id, user_id=current_user.id).first()
+            if acc:
+                if tx.type == 'income':
+                    acc.current_balance -= tx.amount
+                else:
+                    acc.current_balance += tx.amount
+
+        db.session.delete(tx)
+        db.session.commit()
+        log_activity(current_user.id, f"Deleted transaction #{tx_id}")
+        emit_user_event(current_user.id, 'transaction.deleted', tx_id)
+        return jsonify({'success': True})
+
+    # PUT Edit logic
+    data = request.get_json() or {}
+    old_amount = tx.amount
+    old_type = tx.type
+    old_account_id = tx.account_id
+
+    # Reverse old balance effect
+    if old_account_id:
+        old_acc = Account.query.filter_by(id=old_account_id, user_id=current_user.id).first()
+        if old_acc:
+            if old_type == 'income':
+                old_acc.current_balance -= old_amount
+            else:
+                old_acc.current_balance += old_amount
+
+    new_amount = float(data.get('amount', tx.amount))
+    new_type = data.get('type', tx.type)
+    new_account_id = data.get('account_id', tx.account_id)
+
+    tx.amount = new_amount
+    tx.type = new_type
+    tx.category = data.get('category', tx.category)
+    tx.description = data.get('description', tx.description)
+    tx.merchant = data.get('merchant', tx.merchant)
+    tx.payment_method = data.get('payment_method', tx.payment_method)
+    tx.account_id = new_account_id
+    if 'date' in data and data['date']:
+        try:
+            tx.date = datetime.datetime.strptime(data['date'].split('T')[0], '%Y-%m-%d')
+        except Exception:
+            pass
+
+    # Apply new balance effect
+    if new_account_id:
+        new_acc = Account.query.filter_by(id=new_account_id, user_id=current_user.id).first()
+        if new_acc:
+            if new_type == 'income':
+                new_acc.current_balance += new_amount
+            else:
+                new_acc.current_balance -= new_amount
+
     db.session.commit()
-    log_activity(current_user.id, f"Deleted transaction #{tx_id}")
-    emit_user_event(current_user.id, 'transaction.deleted', tx_id)
-    return jsonify({'success': True})
+    log_activity(current_user.id, f"Updated transaction #{tx_id}")
+    emit_user_event(current_user.id, 'transaction.updated', tx_id)
+    return jsonify(tx.to_dict())
+
+# --- FINANCIAL REPORTS ENDPOINT ---
+@app.route('/api/reports/generate', methods=['GET', 'POST'])
+@token_required
+def generate_financial_report_data(current_user):
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        from_str = data.get('from_date')
+        to_str = data.get('to_date')
+        acc_filter = data.get('account_id')
+        cat_filter = data.get('category')
+        tx_type_filter = data.get('type')
+    else:
+        from_str = request.args.get('from_date')
+        to_str = request.args.get('to_date')
+        acc_filter = request.args.get('account_id')
+        cat_filter = request.args.get('category')
+        tx_type_filter = request.args.get('type')
+
+    now = datetime.datetime.utcnow()
+    if not from_str:
+        from_dt = datetime.datetime(now.year, now.month, 1)
+    else:
+        try:
+            from_dt = datetime.datetime.strptime(from_str.split('T')[0], '%Y-%m-%d')
+        except Exception:
+            from_dt = datetime.datetime(now.year, now.month, 1)
+
+    if not to_str:
+        to_dt = datetime.datetime(now.year, now.month, now.day, 23, 59, 59)
+    else:
+        try:
+            to_dt = datetime.datetime.strptime(to_str.split('T')[0], '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        except Exception:
+            to_dt = now
+
+    query = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        Transaction.date >= from_dt,
+        Transaction.date <= to_dt
+    )
+
+    if acc_filter and str(acc_filter) != 'all':
+        try:
+            query = query.filter(Transaction.account_id == int(acc_filter))
+        except Exception:
+            pass
+
+    if cat_filter and str(cat_filter) != 'all':
+        query = query.filter(Transaction.category == str(cat_filter))
+
+    if tx_type_filter and str(tx_type_filter) != 'all':
+        query = query.filter(Transaction.type == str(tx_type_filter))
+
+    transactions = query.order_by(Transaction.date.desc()).all()
+
+    total_income = sum(t.amount for t in transactions if t.type == 'income')
+    total_expense = sum(t.amount for t in transactions if t.type == 'expense')
+    net_cash_flow = total_income - total_expense
+    savings_rate = round((net_cash_flow / total_income * 100), 1) if total_income > 0 else 0.0
+
+    exp_categories = {}
+    inc_categories = {}
+    exp_accounts = {}
+    inc_accounts = {}
+    daily_spending = {}
+
+    user_accounts = {a.id: a.name for a in Account.query.filter_by(user_id=current_user.id).all()}
+
+    for t in transactions:
+        acc_name = user_accounts.get(t.account_id, 'Unassigned')
+        day_key = t.date.strftime('%Y-%m-%d') if t.date else 'Unknown'
+        if t.type == 'expense':
+            exp_categories[t.category] = exp_categories.get(t.category, 0.0) + t.amount
+            exp_accounts[acc_name] = exp_accounts.get(acc_name, 0.0) + t.amount
+            daily_spending[day_key] = daily_spending.get(day_key, 0.0) + t.amount
+        elif t.type == 'income':
+            inc_categories[t.category] = inc_categories.get(t.category, 0.0) + t.amount
+            inc_accounts[acc_name] = inc_accounts.get(acc_name, 0.0) + t.amount
+
+    expenses_list = [t.to_dict() for t in transactions if t.type == 'expense']
+    top_expenses = sorted(expenses_list, key=lambda x: x['amount'], reverse=True)[:5]
+    largest_tx = top_expenses[0] if top_expenses else None
+
+    total_days = max(1, (to_dt - from_dt).days + 1)
+    avg_daily_spending = round(total_expense / total_days, 2)
+    avg_tx_value = round(total_expense / max(1, len(expenses_list)), 2)
+
+    return jsonify({
+        'from_date': from_dt.strftime('%Y-%m-%d'),
+        'to_date': to_dt.strftime('%Y-%m-%d'),
+        'summary': {
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'net_cash_flow': net_cash_flow,
+            'savings_rate': savings_rate,
+            'transaction_count': len(transactions),
+            'avg_daily_spending': avg_daily_spending,
+            'avg_transaction_value': avg_tx_value,
+            'largest_transaction': largest_tx
+        },
+        'breakdowns': {
+            'expense_by_category': exp_categories,
+            'income_by_category': inc_categories,
+            'expense_by_account': exp_accounts,
+            'income_by_account': inc_accounts,
+            'daily_spending': daily_spending,
+            'top_expenses': top_expenses
+        },
+        'transactions': [t.to_dict() for t in transactions]
+    })
+
+@app.route('/api/ai/quick-questions', methods=['GET'])
+@token_required
+def get_ai_quick_questions_route(current_user):
+    from services.ai_copilot import generate_dynamic_quick_questions
+    questions = generate_dynamic_quick_questions(current_user.id)
+    return jsonify({'questions': questions})
 
 # --- BUDGETS API ---
 @app.route('/api/budgets', methods=['GET', 'POST'])

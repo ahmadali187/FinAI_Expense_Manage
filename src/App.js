@@ -17,7 +17,7 @@ import CommandPalette from './components/common/CommandPalette';
 import AiAssistantModal from './components/AI/AiAssistantModal';
 import ReceiptScannerModal from './components/AI/ReceiptScannerModal';
 import CurrencyConverterModal from './components/Finance/CurrencyConverterModal';
-import QuickAddExpenseModal from './components/AI/QuickAddExpenseModal';
+import CentralCreateModal from './components/common/CentralCreateModal';
 import MobileNavbar from './components/Layout/MobileNavbar';
 
 // Page Components
@@ -189,7 +189,7 @@ const AppContent = () => {
             onClose={() => setShowAiAssistant(false)}
           />
 
-          <QuickAddExpenseModal
+          <CentralCreateModal
             isOpen={showQuickAdd}
             onClose={() => setShowQuickAdd(false)}
           />

@@ -321,3 +321,51 @@ def answer_financial_copilot(query, transactions, budgets, subscriptions, goals,
             {'label': 'Show Transactions', 'tab': 'transactions'}
         ]
     }
+
+def generate_dynamic_quick_questions(user_id):
+    from models import db, Transaction, Account, Budget, Subscription, SavingsGoal
+    user_tx_count = Transaction.query.filter_by(user_id=user_id).count()
+    user_acc_count = Account.query.filter_by(user_id=user_id, is_archived=False).count()
+
+    if user_acc_count == 0:
+        return [
+            "How do I add my first bank account or wallet?",
+            "How does FinAI track my financial health?",
+            "Can I import transactions via CSV?"
+        ]
+
+    if user_tx_count == 0:
+        return [
+            "How should I start tracking my expenses?",
+            "Can I scan receipts to log expenses automatically?",
+            "What is Safe-to-Spend?"
+        ]
+
+    top_cat = db.session.query(
+        Transaction.category, db.func.sum(Transaction.amount)
+    ).filter_by(user_id=user_id, type='expense').group_by(Transaction.category).order_by(db.func.sum(Transaction.amount).desc()).first()
+
+    unpaid_sub = Subscription.query.filter_by(user_id=user_id, is_paid=False).first()
+    active_goal = SavingsGoal.query.filter_by(user_id=user_id).first()
+    active_budget = Budget.query.filter_by(user_id=user_id).first()
+
+    questions = []
+    if top_cat:
+        questions.append(f"How much did I spend on {top_cat[0]} this month?")
+    else:
+        questions.append("Where can I reduce my monthly expenses?")
+
+    if unpaid_sub:
+        questions.append(f"How can I prepare for my upcoming {unpaid_sub.title} bill of ₹{unpaid_sub.amount:,.0f}?")
+    else:
+        questions.append("Can I afford a ₹15,000 purchase next month?")
+
+    if active_budget:
+        questions.append(f"How much of my {active_budget.category} budget is left?")
+    elif active_goal:
+        questions.append(f"Am I on track for my '{active_goal.title}' savings goal?")
+    else:
+        questions.append("How much should I recommend saving every month?")
+
+    questions.append("What is my total net worth and cash flow overview?")
+    return questions

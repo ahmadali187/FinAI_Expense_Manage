@@ -79,13 +79,23 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const quickPrompts = [
+  const [quickPrompts, setQuickPrompts] = useState([
     "What is my net balance?",
-    "Can I afford a ₹10,000 purchase?",
     "Where am I spending the most?",
-    "Add ₹500 food expense",
-    "Set food budget to ₹8,000"
-  ];
+    "Can I afford a ₹15,000 purchase?"
+  ]);
+
+  useEffect(() => {
+    if (isOpen) {
+      api.getAiQuickQuestions()
+        .then(res => {
+          if (res && Array.isArray(res.questions) && res.questions.length > 0) {
+            setQuickPrompts(res.questions);
+          }
+        })
+        .catch(err => console.error('Failed to load dynamic AI questions:', err));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

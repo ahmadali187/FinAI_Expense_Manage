@@ -1,289 +1,422 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { UserContext } from '../../contexts/UserContext';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { CurrencyContext } from '../../contexts/CurrencyContext';
 import * as api from '../../services/api';
-import { FaFileAlt, FaPlus, FaSave, FaDownload, FaImage, FaTrash, FaPen } from 'react-icons/fa';
-import './ReportPage.css';
+import { 
+  FaFileInvoiceDollar, FaFilter, 
+  FaFileCsv, FaPrint, FaArrowUp, FaArrowDown
+} from 'react-icons/fa';
 
 const ReportPage = () => {
-  const { loggedInUser } = useContext(UserContext);
+  const { formatAmount } = useContext(CurrencyContext);
 
-  const [reportTitle, setReportTitle] = useState('');
-  const [reportContent, setReportContent] = useState([]);
-  const [currentText, setCurrentText] = useState('');
-  const [savedReports, setSavedReports] = useState([]);
-  const [editingReportId, setEditingReportId] = useState(null);
-  const fileInputRef = useRef(null);
+  const getMonthStart = () => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+  };
 
-  const fetchReports = useCallback(async () => {
-    if (loggedInUser) {
-      try {
-        const res = await api.getReportTemplates();
-        setSavedReports(Array.isArray(res) ? res : []);
-      } catch (err) {
-        console.error("Failed to fetch reports:", err);
-      }
+  const getToday = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const [fromDate, setFromDate] = useState(getMonthStart());
+  const [toDate, setToDate] = useState(getToday());
+  const [selectedPreset, setSelectedPreset] = useState('this_month');
+  const [selectedAccount, setSelectedAccount] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
+
+  const [accounts, setAccounts] = useState([]);
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchAccountsList = async () => {
+    try {
+      const data = await api.getAccounts();
+      setAccounts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to fetch accounts:', err);
     }
-  }, [loggedInUser]);
+  };
+
+  const generateReport = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await api.generateFinancialReport({
+        from_date: fromDate,
+        to_date: toDate,
+        account_id: selectedAccount,
+        category: selectedCategory,
+        type: selectedType
+      });
+      setReportData(data);
+    } catch (err) {
+      console.error('Failed to generate report:', err);
+      setError('Failed to generate financial report.');
+    } finally {
+      setLoading(false);
+    }
+  }, [fromDate, toDate, selectedAccount, selectedCategory, selectedType]);
 
   useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+    fetchAccountsList();
+    generateReport();
+  }, [generateReport]);
 
-  const handleSaveReport = async () => {
-    if (!loggedInUser) {
-      alert("Please log in to save reports.");
-      return;
+  const handlePresetSelect = (presetKey) => {
+    setSelectedPreset(presetKey);
+    const today = new Date();
+    let start = new Date();
+    let end = new Date();
+
+    switch (presetKey) {
+      case 'today':
+        start = today;
+        end = today;
+        break;
+      case 'this_week':
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        start = new Date(today.setDate(diff));
+        end = new Date();
+        break;
+      case 'this_month':
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+        end = new Date();
+        break;
+      case 'last_month':
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        end = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case 'last_3_months':
+        start = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+        end = new Date();
+        break;
+      case 'this_year':
+        start = new Date(today.getFullYear(), 0, 1);
+        end = new Date();
+        break;
+      default:
+        break;
     }
-    if (!reportTitle.trim() || reportContent.length === 0) {
-      alert("Please enter a title and add content before saving.");
-      return;
-    }
 
-    try {
-      await api.addReportTemplate({
-        title: reportTitle,
-        dateRange: 'custom',
-        categories: reportContent.map(c => c.value ? String(c.value).slice(0, 30) : 'Content')
-      });
-      fetchReports();
-      alert("Report saved successfully to SQLite!");
-      handleNewReport();
-    } catch (err) {
-      console.error("Failed to save report:", err);
-      alert("Failed to save report to database.");
-    }
+    setFromDate(start.toISOString().split('T')[0]);
+    setToDate(end.toISOString().split('T')[0]);
   };
 
-  const handleNewReport = () => {
-    setReportTitle('');
-    setReportContent([]);
-    setCurrentText('');
-    setEditingReportId(null);
-  };
-
-  const handleDeleteReport = async (reportId) => {
-    if (window.confirm("Are you sure you want to delete this report template?")) {
-      try {
-        await api.deleteReportTemplate(reportId);
-        fetchReports();
-      } catch (err) {
-        console.error("Failed to delete report:", err);
-      }
-    }
-  };
-
-  const loadReportForEditing = (reportId) => {
-    const reportToEdit = savedReports.find(report => report.id === reportId);
-    if (reportToEdit) {
-      setReportTitle(reportToEdit.title);
-      if (typeof reportToEdit.content === 'string') {
-        setReportContent([{ type: 'text', value: reportToEdit.content, id: `text_${Date.now()}` }]);
-      } else {
-        setReportContent(reportToEdit.content || []);
-      }
-      setCurrentText('');
-      setEditingReportId(reportToEdit.id);
-    }
-  };
-
-  const handleAddText = () => {
-    if (!currentText.trim()) return;
-    setReportContent([...reportContent, { type: 'text', value: currentText, id: `text_${Date.now()}` }]);
-    setCurrentText('');
-  };
-
-  const handleImageSelected = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newImageBlock = { type: 'image', src: reader.result, id: `image_${Date.now()}` };
-        setReportContent(prev => [...prev, newImageBlock]);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveBlock = (blockId) => {
-    setReportContent(reportContent.filter(block => block.id !== blockId));
-  };
-
-  const handleDownloadReport = () => {
-    if (!reportTitle.trim() && reportContent.length === 0) {
-      alert("Please create content before downloading.");
+  const handleExportCSV = () => {
+    if (!reportData || !reportData.transactions || reportData.transactions.length === 0) {
+      alert('No transaction data available to export.');
       return;
     }
 
-    let reportHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <title>${reportTitle || 'Financial Report'}</title>
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 40px; color: #0f172a; }
-          h1 { color: #4f46e5; border-bottom: 2px solid #6366f1; padding-bottom: 10px; }
-          p { white-space: pre-wrap; line-height: 1.6; }
-          img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
-          .block { margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
-        </style>
-      </head>
-      <body>
-        <h1>${reportTitle || 'Financial Report'}</h1>
-    `;
+    const headers = ['Date', 'Description', 'Category', 'Type', 'Amount (INR)'];
+    const rows = reportData.transactions.map(t => [
+      t.date ? t.date.split('T')[0] : '',
+      `"${(t.description || '').replace(/"/g, '""')}"`,
+      t.category || '',
+      t.type || '',
+      t.amount || 0
+    ]);
 
-    reportContent.forEach(block => {
-      reportHtml += '<div class="block">';
-      if (block.type === 'text') {
-        reportHtml += `<p>${block.value}</p>`;
-      } else if (block.type === 'image' && block.src) {
-        reportHtml += `<img src="${block.src}" alt="Report Image">`;
-      }
-      reportHtml += '</div>';
-    });
-
-    reportHtml += `</body></html>`;
-
-    const blob = new Blob([reportHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${(reportTitle || 'report').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `FinAI_Report_${fromDate}_to_${toDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const categoriesList = [
+    'Food', 'Transport', 'Utilities', 'Entertainment', 'Shopping', 
+    'Health', 'Housing', 'Education', 'Salary', 'Freelance', 'Investments', 'Other'
+  ];
 
   return (
-    <div className="glass-card" style={{ maxWidth: '900px', margin: '20px auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaFileAlt color="var(--primary-glow)" size={24} />
-          <h2 style={{ margin: 0, fontWeight: 800 }}>Custom Financial Report Builder</h2>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button onClick={handleNewReport} className="btn-glass-secondary">
-            <FaPlus /> New
-          </button>
-          <button onClick={handleSaveReport} className="btn-gradient-primary">
-            <FaSave /> {editingReportId ? 'Update Report' : 'Save Report'}
-          </button>
-          <button onClick={handleDownloadReport} className="btn-glass-secondary">
-            <FaDownload /> Download HTML
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="space-y-6 pb-24">
+      {/* Title */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-            Report Title
-          </label>
-          <input
-            type="text"
-            className="glass-input"
-            value={reportTitle}
-            onChange={(e) => setReportTitle(e.target.value)}
-            placeholder="e.g. Q3 Financial Performance & Goals"
-          />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <FaFileInvoiceDollar className="text-indigo-400" /> Financial Reports
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Generate, analyze, and export date-driven financial statements and expense breakdowns.
+          </p>
         </div>
 
-        <div>
-          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-            Add Text Content Block
-          </label>
-          <textarea
-            className="glass-input"
-            value={currentText}
-            onChange={(e) => setCurrentText(e.target.value)}
-            placeholder="Type notes, analysis, or financial summary text..."
-            rows="4"
-          />
-          <button onClick={handleAddText} className="btn-glass-secondary" style={{ marginTop: '8px', padding: '6px 12px', fontSize: '0.85rem' }}>
-            + Append Text Block
-          </button>
-        </div>
-
-        <div>
-          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-            Add Image / Chart Screenshot
-          </label>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            onChange={handleImageSelected}
-            style={{ display: 'none' }}
-          />
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => fileInputRef.current && fileInputRef.current.click()}
-            className="btn-glass-secondary"
-            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            onClick={handleExportCSV}
+            className="px-3.5 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl flex items-center gap-2 transition"
           >
-            <FaImage /> Upload Image Block
+            <FaFileCsv className="text-sm" /> Export CSV
+          </button>
+          <button
+            onClick={handlePrint}
+            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition"
+          >
+            <FaPrint className="text-sm" /> Print / PDF
           </button>
         </div>
+      </div>
 
-        {/* Live Preview Section */}
-        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--surface-glass-border)' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>Report Preview</h3>
-          
-          {reportContent.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No content added to this report yet.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {reportContent.map(block => (
-                <div key={block.id} className="report-block">
-                  {block.type === 'text' && <p style={{ margin: 0 }}>{block.value}</p>}
-                  {block.type === 'image' && <img src={block.src} alt="Report Preview" />}
-                  <button
-                    className="btn-glass-secondary"
-                    style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#ef4444', marginTop: '8px' }}
-                    onClick={() => handleRemoveBlock(block.id)}
-                  >
-                    <FaTrash /> Remove Block
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* Report Filter Controls Card */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        {/* Date Range Quick Presets */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {[
+            { key: 'today', label: 'Today' },
+            { key: 'this_week', label: 'This Week' },
+            { key: 'this_month', label: 'This Month' },
+            { key: 'last_month', label: 'Last Month' },
+            { key: 'last_3_months', label: 'Last 3 Months' },
+            { key: 'this_year', label: 'This Year' }
+          ].map(preset => (
+            <button
+              key={preset.key}
+              onClick={() => handlePresetSelect(preset.key)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                selectedPreset === preset.key
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              {preset.label}
+            </button>
+          ))}
         </div>
 
-        {/* Saved Reports List */}
-        {savedReports.length > 0 && (
-          <div className="saved-reports-section">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>Saved Reports ({savedReports.length})</h3>
-            <ul>
-              {savedReports.map(report => (
-                <li key={report.id} onClick={() => loadReportForEditing(report.id)}>
-                  <div>
-                    <strong style={{ fontSize: '1rem' }}>{report.title}</strong>
-                    <small style={{ color: 'var(--text-muted)' }}>
-                      Last modified: {new Date(report.lastModified).toLocaleDateString()}
-                    </small>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="btn-glass-secondary"
-                      style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                      onClick={(e) => { e.stopPropagation(); loadReportForEditing(report.id); }}
-                    >
-                      <FaPen /> Edit
-                    </button>
-                    <button
-                      className="btn-glass-secondary"
-                      style={{ padding: '4px 10px', fontSize: '0.75rem', color: '#ef4444' }}
-                      onClick={(e) => { e.stopPropagation(); handleDeleteReport(report.id); }}
-                    >
-                      <FaTrash /> Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+        {/* Date & Filter Controls */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-slate-800">
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">From Date</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={e => {
+                setFromDate(e.target.value);
+                setSelectedPreset('custom');
+              }}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            />
           </div>
-        )}
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">To Date</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={e => {
+                setToDate(e.target.value);
+                setSelectedPreset('custom');
+              }}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Account Filter</label>
+            <select
+              value={selectedAccount}
+              onChange={e => setSelectedAccount(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            >
+              <option value="all">All Accounts</option>
+              {accounts.map(acc => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Category</label>
+            <select
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            >
+              <option value="all">All Categories</option>
+              {categoriesList.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Type</label>
+            <select
+              value={selectedType}
+              onChange={e => setSelectedType(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            >
+              <option value="all">All Types</option>
+              <option value="expense">Expense Only</option>
+              <option value="income">Income Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={generateReport}
+            disabled={loading}
+            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2"
+          >
+            <FaFilter /> {loading ? 'Generating...' : 'Generate Report'}
+          </button>
+        </div>
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Generated Report Summary Metrics */}
+      {reportData && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Total Income</span>
+              <span className="text-lg sm:text-xl font-bold text-emerald-400 mt-1 block">
+                {formatAmount(reportData.summary?.total_income || 0)}
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Total Expenses</span>
+              <span className="text-lg sm:text-xl font-bold text-red-400 mt-1 block">
+                {formatAmount(reportData.summary?.total_expense || 0)}
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Net Cash Flow</span>
+              <span className={`text-lg sm:text-xl font-bold mt-1 block ${(reportData.summary?.net_cash_flow || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {formatAmount(reportData.summary?.net_cash_flow || 0)}
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Savings Rate</span>
+              <span className="text-lg sm:text-xl font-bold text-cyan-400 mt-1 block">
+                {reportData.summary?.savings_rate || 0}%
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Transactions</span>
+              <span className="text-lg sm:text-xl font-bold text-white mt-1 block">
+                {reportData.summary?.transaction_count || 0}
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs text-slate-400 font-medium block">Avg Daily Spend</span>
+              <span className="text-lg sm:text-xl font-bold text-indigo-300 mt-1 block">
+                {formatAmount(reportData.summary?.avg_daily_spending || 0)}
+              </span>
+            </div>
+          </div>
+
+          {/* Breakdowns Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Category Expenses Breakdown */}
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <FaArrowDown className="text-red-400" /> Expenses by Category
+              </h3>
+              {Object.keys(reportData.breakdowns?.expense_by_category || {}).length === 0 ? (
+                <p className="text-xs text-slate-500 py-4">No category expense records in date range.</p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(reportData.breakdowns.expense_by_category).map(([cat, amt]) => {
+                    const pct = reportData.summary.total_expense > 0 ? (amt / reportData.summary.total_expense * 100).toFixed(1) : 0;
+                    return (
+                      <div key={cat} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-300">{cat}</span>
+                          <span className="text-white">{formatAmount(amt)} <span className="text-slate-400 font-normal">({pct}%)</span></span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div className="bg-red-500 h-full rounded-full" style={{ width: `${Math.min(100, pct)}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Income by Category Breakdown */}
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <FaArrowUp className="text-emerald-400" /> Income by Category
+              </h3>
+              {Object.keys(reportData.breakdowns?.income_by_category || {}).length === 0 ? (
+                <p className="text-xs text-slate-500 py-4">No income records in date range.</p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(reportData.breakdowns.income_by_category).map(([cat, amt]) => {
+                    const pct = reportData.summary.total_income > 0 ? (amt / reportData.summary.total_income * 100).toFixed(1) : 0;
+                    return (
+                      <div key={cat} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-300">{cat}</span>
+                          <span className="text-white">{formatAmount(amt)} <span className="text-slate-400 font-normal">({pct}%)</span></span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(100, pct)}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Transactions List */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <h3 className="text-base font-bold text-white">Statement Transactions ({reportData.transactions?.length || 0})</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-800">
+                    <th className="pb-3 font-semibold">Date</th>
+                    <th className="pb-3 font-semibold">Description</th>
+                    <th className="pb-3 font-semibold">Category</th>
+                    <th className="pb-3 font-semibold text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {reportData.transactions?.map(t => (
+                    <tr key={t.id} className="hover:bg-slate-800/40">
+                      <td className="py-3 text-slate-400 font-mono">{t.date ? t.date.split('T')[0] : '-'}</td>
+                      <td className="py-3 text-white font-medium">{t.description || t.category}</td>
+                      <td className="py-3 text-slate-400">{t.category}</td>
+                      <td className={`py-3 text-right font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

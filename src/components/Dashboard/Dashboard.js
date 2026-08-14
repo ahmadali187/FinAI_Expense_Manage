@@ -26,7 +26,7 @@ import { exportTransactionsToCSV, generatePDFStatement } from '../../utils/expor
 
 import {
   FaPlus, FaReceipt, FaUsers, FaDownload, FaPrint, FaFileCsv,
-  FaArrowUp, FaArrowDown, FaWallet, FaExclamationTriangle, FaTrash, FaEdit, FaBolt, FaMagic
+  FaArrowUp, FaArrowDown, FaWallet, FaExclamationTriangle, FaTrash, FaEdit, FaMagic
 } from 'react-icons/fa';
 
 const BudgetManager = lazy(() => import('../Budget/BudgetManager'));
@@ -162,16 +162,6 @@ const Dashboard = () => {
     setShowAddModal(true);
   };
 
-  const handleLoadDemoData = async () => {
-    try {
-      await api.triggerDemoData();
-      refreshTransactions();
-      fetchBackendDashboard();
-    } catch (err) {
-      console.error("Failed to load demo data:", err);
-    }
-  };
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
@@ -197,9 +187,6 @@ const Dashboard = () => {
         </button>
         <button className="btn-glass-secondary" onClick={() => setShowBillSplitter(true)}>
           <FaUsers /> Split Bill
-        </button>
-        <button className="btn-glass-secondary" onClick={handleLoadDemoData}>
-          <FaBolt color="#fbbf24" /> Load Demo Data
         </button>
         <button className="btn-glass-secondary" onClick={() => exportTransactionsToCSV(transactions)}>
           <FaDownload /> Export CSV

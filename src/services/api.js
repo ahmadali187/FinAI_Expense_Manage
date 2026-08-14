@@ -56,8 +56,12 @@ export const getCurrentUser = () => apiRequest('/auth/me');
 export const changePassword = (current_password, new_password) => apiRequest('/auth/change-password', 'POST', { current_password, new_password });
 
 // --- Accounts / Wallets ---
-export const getAccounts = () => apiRequest('/accounts');
+export const getAccounts = (includeArchived = false) => apiRequest(`/accounts${includeArchived ? '?include_archived=true' : ''}`);
 export const addAccount = (accData) => apiRequest('/accounts', 'POST', accData);
+export const updateAccount = (accId, accData) => apiRequest(`/accounts/${accId}`, 'PUT', accData);
+export const deleteAccount = (accId, action = null) => apiRequest(`/accounts/${accId}${action ? `?action=${action}` : ''}`, 'DELETE');
+export const archiveAccount = (accId) => apiRequest(`/accounts/${accId}/archive`, 'PUT');
+export const restoreAccount = (accId) => apiRequest(`/accounts/${accId}/restore`, 'PUT');
 
 // --- Dashboard & Intelligence ---
 export const getDashboardData = () => apiRequest('/dashboard');
@@ -68,6 +72,7 @@ export const getActivityLogs = () => apiRequest('/activity-logs');
 // --- CRUD Financial Endpoints ---
 export const getTransactions = () => apiRequest('/transactions');
 export const addTransaction = (txData) => apiRequest('/transactions', 'POST', txData);
+export const updateTransaction = (txId, txData) => apiRequest(`/transactions/${txId}`, 'PUT', txData);
 export const deleteTransaction = (txId) => apiRequest(`/transactions/${txId}`, 'DELETE');
 
 export const getBudgets = () => apiRequest('/budgets');
@@ -84,6 +89,7 @@ export const addSavingsGoal = (goalData) => apiRequest('/goals', 'POST', goalDat
 export const depositSavingsGoal = (goalId, amount) => apiRequest(`/goals/${goalId}`, 'PUT', { add_deposit: amount });
 export const deleteSavingsGoal = (goalId) => apiRequest(`/goals/${goalId}`, 'DELETE');
 
+export const generateFinancialReport = (params) => apiRequest('/reports/generate', 'POST', params);
 export const getReportTemplates = () => apiRequest('/report-templates');
 export const addReportTemplate = (tmplData) => apiRequest('/report-templates', 'POST', tmplData);
 export const deleteReportTemplate = (tmplId) => apiRequest(`/report-templates/${tmplId}`, 'DELETE');
@@ -95,6 +101,7 @@ export const addAsset = (assetData) => apiRequest('/assets', 'POST', assetData);
 export const addLiability = (liabilityData) => apiRequest('/liabilities', 'POST', liabilityData);
 
 // --- AI Copilot & Imports ---
+export const getAiQuickQuestions = () => apiRequest('/ai/quick-questions');
 export const sendAiChat = (query) => apiRequest('/ai/chat', 'POST', { query });
 export const confirmAiAction = (proposal) => apiRequest('/ai/confirm-action', 'POST', { proposal });
 export const parseQuickAdd = (text) => apiRequest('/ai/quick-add', 'POST', { text });

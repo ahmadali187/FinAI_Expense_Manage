@@ -34,12 +34,17 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     name = db.Column(db.String(120), nullable=False)
-    type = db.Column(db.String(50), nullable=False, default='Bank') # Bank, Savings, Cash, Credit Card, Debit Card, UPI
+    type = db.Column(db.String(50), nullable=False, default='Bank') # Bank, Savings, Cash, Credit Card, Debit Card, UPI, Wallet, Investment, Loan, Other
+    institution_name = db.Column(db.String(120), nullable=True)
+    last_four = db.Column(db.String(10), nullable=True)
+    color = db.Column(db.String(20), nullable=True, default='#3B82F6')
+    icon = db.Column(db.String(50), nullable=True, default='wallet')
     opening_balance = db.Column(db.Float, default=0.0)
     current_balance = db.Column(db.Float, default=0.0)
     currency = db.Column(db.String(10), default='INR')
     notes = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    is_archived = db.Column(db.Boolean, default=False)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def to_dict(self):
@@ -48,11 +53,16 @@ class Account(db.Model):
             'user_id': self.user_id,
             'name': self.name,
             'type': self.type,
+            'institution_name': self.institution_name,
+            'last_four': self.last_four,
+            'color': self.color or '#3B82F6',
+            'icon': self.icon or 'wallet',
             'opening_balance': self.opening_balance,
             'current_balance': self.current_balance,
             'currency': self.currency,
             'notes': self.notes,
-            'is_active': self.is_active,
+            'is_active': self.is_active if self.is_active is not None else True,
+            'is_archived': bool(self.is_archived),
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
