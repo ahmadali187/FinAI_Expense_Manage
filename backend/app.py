@@ -664,112 +664,130 @@ def single_transaction(current_user, tx_id):
 @app.route('/api/reports/generate', methods=['GET', 'POST'])
 @token_required
 def generate_financial_report_data(current_user):
-    if request.method == 'POST':
-        data = request.get_json() or {}
-        from_str = data.get('from_date')
-        to_str = data.get('to_date')
-        acc_filter = data.get('account_id')
-        cat_filter = data.get('category')
-        tx_type_filter = data.get('type')
-    else:
-        from_str = request.args.get('from_date')
-        to_str = request.args.get('to_date')
-        acc_filter = request.args.get('account_id')
-        cat_filter = request.args.get('category')
-        tx_type_filter = request.args.get('type')
+    try:
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            from_str = data.get('from_date')
+            to_str = data.get('to_date')
+            acc_filter = data.get('account_id')
+            cat_filter = data.get('category')
+            tx_type_filter = data.get('type')
+        else:
+            from_str = request.args.get('from_date')
+            to_str = request.args.get('to_date')
+            acc_filter = request.args.get('account_id')
+            cat_filter = request.args.get('category')
+            tx_type_filter = request.args.get('type')
 
-    now = datetime.datetime.utcnow()
-    if not from_str:
-        from_dt = datetime.datetime(now.year, now.month, 1)
-    else:
-        try:
-            from_dt = datetime.datetime.strptime(from_str.split('T')[0], '%Y-%m-%d')
-        except Exception:
-            from_dt = datetime.datetime(now.year, now.month, 1)
+        def parse_to_iso_date(d_val):
+            if not d_val:
+                return None
+            s = str(d_val).strip()
+            if 'T' in s:
+                s = s.split('T')[0]
+            if '/' in s:
+                parts = s.split('/')
+                if len(parts) == 3:
+                    if len(parts[2]) == 4: # DD/MM/YYYY
+                        return f"{parts[2]}-{parts[1].zfill(2)}-{parts[0].zfill(2)}"
+                    elif len(parts[0]) == 4: # YYYY/MM/DD
+                        return f"{parts[0]}-{parts[1].zfill(2)}-{parts[2].zfill(2)}"
+            return s
 
-    if not to_str:
-        to_dt = datetime.datetime(now.year, now.month, now.day, 23, 59, 59)
-    else:
-        try:
-            to_dt = datetime.datetime.strptime(to_str.split('T')[0], '%Y-%m-%d').replace(hour=23, minute=59, second=59)
-        except Exception:
-            to_dt = now
+        now = datetime.datetime.utcnow()
+        from_date_iso = parse_to_iso_date(from_str) or f"{now.year:04d}-{now.month:02d}-01"
+        to_date_iso = parse_to_iso_date(to_str) or f"{now.year:04d}-{now.month:02d}-{now.day:02d}"
 
-    query = Transaction.query.filter(
-        Transaction.user_id == current_user.id,
-        Transaction.date >= from_dt,
-        Transaction.date <= to_dt
-    )
+        query = Transaction.query.filter(
+            Transaction.user_id == current_user.id,
+            Transaction.date >= from_date_iso,
+            Transaction.date <= to_date_iso + 'T23:59:59'
+        )
 
-    if acc_filter and str(acc_filter) != 'all':
-        try:
-            query = query.filter(Transaction.account_id == int(acc_filter))
-        except Exception:
-            pass
+        if acc_filter and str(acc_filter) != 'all':
+            try:
+                query = query.filter(Transaction.account_id == int(acc_filter))
+            except Exception:
+                pass
 
-    if cat_filter and str(cat_filter) != 'all':
-        query = query.filter(Transaction.category == str(cat_filter))
+        if cat_filter and str(cat_filter) != 'all':
+            query = query.filter(Transaction.category == str(cat_filter))
 
-    if tx_type_filter and str(tx_type_filter) != 'all':
-        query = query.filter(Transaction.type == str(tx_type_filter))
+        if tx_type_filter and str(tx_type_filter) != 'all':
+            query = query.filter(Transaction.type == str(tx_type_filter))
 
-    transactions = query.order_by(Transaction.date.desc()).all()
+        transactions = query.order_by(Transaction.date.desc()).all()
 
-    total_income = sum(t.amount for t in transactions if t.type == 'income')
-    total_expense = sum(t.amount for t in transactions if t.type == 'expense')
-    net_cash_flow = total_income - total_expense
-    savings_rate = round((net_cash_flow / total_income * 100), 1) if total_income > 0 else 0.0
+        total_income = sum(t.amount for t in transactions if t.type == 'income')
+        total_expense = sum(t.amount for t in transactions if t.type == 'expense')
+        net_cash_flow = total_income - total_expense
+        savings_rate = round((net_cash_flow / total_income * 100), 1) if total_income > 0 else 0.0
 
-    exp_categories = {}
-    inc_categories = {}
-    exp_accounts = {}
-    inc_accounts = {}
-    daily_spending = {}
+        exp_categories = {}
+        inc_categories = {}
+        exp_accounts = {}
+        inc_accounts = {}
+        daily_spending = {}
 
-    user_accounts = {a.id: a.name for a in Account.query.filter_by(user_id=current_user.id).all()}
+        user_accounts = {a.id: a.name for a in Account.query.filter_by(user_id=current_user.id).all()}
 
-    for t in transactions:
-        acc_name = user_accounts.get(t.account_id, 'Unassigned')
-        day_key = t.date.strftime('%Y-%m-%d') if t.date else 'Unknown'
-        if t.type == 'expense':
-            exp_categories[t.category] = exp_categories.get(t.category, 0.0) + t.amount
-            exp_accounts[acc_name] = exp_accounts.get(acc_name, 0.0) + t.amount
-            daily_spending[day_key] = daily_spending.get(day_key, 0.0) + t.amount
-        elif t.type == 'income':
-            inc_categories[t.category] = inc_categories.get(t.category, 0.0) + t.amount
-            inc_accounts[acc_name] = inc_accounts.get(acc_name, 0.0) + t.amount
+        for t in transactions:
+            acc_name = user_accounts.get(t.account_id, 'Unassigned')
+            if hasattr(t.date, 'strftime'):
+                day_key = t.date.strftime('%Y-%m-%d')
+            elif t.date:
+                day_key = str(t.date).split('T')[0]
+            else:
+                day_key = 'Unknown'
 
-    expenses_list = [t.to_dict() for t in transactions if t.type == 'expense']
-    top_expenses = sorted(expenses_list, key=lambda x: x['amount'], reverse=True)[:5]
-    largest_tx = top_expenses[0] if top_expenses else None
+            if t.type == 'expense':
+                exp_categories[t.category] = exp_categories.get(t.category, 0.0) + t.amount
+                exp_accounts[acc_name] = exp_accounts.get(acc_name, 0.0) + t.amount
+                daily_spending[day_key] = daily_spending.get(day_key, 0.0) + t.amount
+            elif t.type == 'income':
+                inc_categories[t.category] = inc_categories.get(t.category, 0.0) + t.amount
+                inc_accounts[acc_name] = inc_accounts.get(acc_name, 0.0) + t.amount
 
-    total_days = max(1, (to_dt - from_dt).days + 1)
-    avg_daily_spending = round(total_expense / total_days, 2)
-    avg_tx_value = round(total_expense / max(1, len(expenses_list)), 2)
+        expenses_list = [t.to_dict() for t in transactions if t.type == 'expense']
+        top_expenses = sorted(expenses_list, key=lambda x: x['amount'], reverse=True)[:5]
+        largest_tx = top_expenses[0] if top_expenses else None
+        avg_daily_spending = round(total_expense / max(len(daily_spending), 1), 2)
+        avg_tx_value = round(total_expense / max(1, len(expenses_list)), 2)
 
-    return jsonify({
-        'from_date': from_dt.strftime('%Y-%m-%d'),
-        'to_date': to_dt.strftime('%Y-%m-%d'),
-        'summary': {
-            'total_income': total_income,
-            'total_expense': total_expense,
-            'net_cash_flow': net_cash_flow,
-            'savings_rate': savings_rate,
-            'transaction_count': len(transactions),
-            'avg_daily_spending': avg_daily_spending,
-            'avg_transaction_value': avg_tx_value,
-            'largest_transaction': largest_tx
-        },
-        'breakdowns': {
-            'expense_by_category': exp_categories,
-            'income_by_category': inc_categories,
-            'expense_by_account': exp_accounts,
-            'income_by_account': inc_accounts,
-            'daily_spending': daily_spending,
-            'top_expenses': top_expenses
-        },
-        'transactions': [t.to_dict() for t in transactions]
-    })
+        cat_breakdown = [{'category': k, 'amount': v, 'type': 'expense'} for k, v in exp_categories.items()] + \
+                        [{'category': k, 'amount': v, 'type': 'income'} for k, v in inc_categories.items()]
+
+        return jsonify({
+            'from_date': from_date_iso,
+            'to_date': to_date_iso,
+            'summary': {
+                'total_income': total_income,
+                'total_expense': total_expense,
+                'total_expenses': total_expense,
+                'net_cash_flow': net_cash_flow,
+                'savings_rate': savings_rate,
+                'transaction_count': len(transactions),
+                'avg_daily_spending': avg_daily_spending,
+                'avg_daily_spend': avg_daily_spending,
+                'avg_transaction_value': avg_tx_value,
+                'largest_transaction': largest_tx
+            },
+            'category_breakdown': cat_breakdown,
+            'breakdowns': {
+                'expense_by_category': exp_categories,
+                'income_by_category': inc_categories,
+                'expense_by_account': exp_accounts,
+                'income_by_account': inc_accounts,
+                'daily_spending': daily_spending,
+                'top_expenses': top_expenses
+            },
+            'account_breakdown': {'expense': exp_accounts, 'income': inc_accounts},
+            'daily_spending': [{'date': k, 'amount': v} for k, v in sorted(daily_spending.items())],
+            'transactions': [t.to_dict() for t in transactions]
+        })
+    except Exception as e:
+        app.logger.error(f"Error generating report for user {current_user.id}: {str(e)}", exc_info=True)
+        return jsonify({'error': 'REPORT_GENERATION_FAILED', 'message': f'Unable to generate report: {str(e)}'}), 500
 
 @app.route('/api/ai/quick-questions', methods=['GET'])
 @token_required
