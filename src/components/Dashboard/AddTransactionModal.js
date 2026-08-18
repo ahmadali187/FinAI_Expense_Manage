@@ -82,6 +82,28 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
     }
   };
 
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    color: 'var(--text-muted, #94a3b8)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginBottom: '6px'
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    background: 'rgba(15, 23, 42, 0.85)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '10px',
+    color: '#ffffff',
+    fontSize: '0.9rem',
+    outline: 'none',
+    boxSizing: 'border-box'
+  };
+
   return (
     <ModalPortal 
       isOpen={isOpen} 
@@ -90,30 +112,42 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
       maxWidth="500px"
     >
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+        <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '10px', color: '#f87171', fontSize: '0.85rem', marginBottom: '16px' }}>
           {error}
         </div>
       )}
 
       {successMsg && (
-        <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-semibold flex items-center gap-2">
-          <FiCheck className="text-lg" /> {successMsg}
+        <div style={{ padding: '10px 14px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '10px', color: '#34d399', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <FiCheck size={18} /> {successMsg}
         </div>
       )}
 
       {/* Type Selector Tabs */}
-      <div className="flex bg-slate-800 p-1 rounded-xl mb-5">
+      <div style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.8)', padding: '4px', borderRadius: '12px', marginBottom: '20px', gap: '4px' }}>
         <button
           type="button"
           onClick={() => {
             setType('expense');
             setCategory('Food');
           }}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${
-            type === 'expense'
-              ? 'bg-red-500 text-white shadow-lg font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          style={{
+            flex: 1,
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '0.88rem',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            background: type === 'expense' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'transparent',
+            color: type === 'expense' ? '#ffffff' : '#94a3b8',
+            boxShadow: type === 'expense' ? '0 4px 12px rgba(239, 68, 68, 0.3)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
         >
           <FiMinusCircle /> Expense
         </button>
@@ -123,24 +157,36 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
             setType('income');
             setCategory('Salary');
           }}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${
-            type === 'income'
-              ? 'bg-emerald-500 text-white shadow-lg font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          style={{
+            flex: 1,
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '0.88rem',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            background: type === 'income' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'transparent',
+            color: type === 'income' ? '#ffffff' : '#94a3b8',
+            boxShadow: type === 'income' ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
         >
           <FiPlusCircle /> Income
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Amount */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+          <label style={labelStyle}>
             Amount (₹) *
           </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold">₹</span>
+          <div style={{ position: 'relative', width: '100%' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '1.2rem', fontWeight: 800 }}>₹</span>
             <input
               type="number"
               step="0.01"
@@ -149,24 +195,29 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
-              className="w-full pl-8 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-xl focus:outline-none focus:border-indigo-500 transition"
+              style={{
+                ...inputStyle,
+                paddingLeft: '34px',
+                fontSize: '1.2rem',
+                fontWeight: 800
+              }}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* Category */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label style={labelStyle}>
               Category *
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+              style={inputStyle}
             >
               {(type === 'income' ? incomeCategories : expenseCategories).map((cat) => (
-                <option key={cat} value={cat}>
+                <option key={cat} value={cat} style={{ background: '#0f172a', color: '#ffffff' }}>
                   {cat}
                 </option>
               ))}
@@ -175,19 +226,19 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
 
           {/* Account */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label style={labelStyle}>
               Account / Wallet
             </label>
             <select
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+              style={inputStyle}
             >
               {accounts.length === 0 ? (
-                <option value="">No Accounts Available</option>
+                <option value="" style={{ background: '#0f172a', color: '#ffffff' }}>No Accounts Available</option>
               ) : (
                 accounts.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
+                  <option key={acc.id} value={acc.id} style={{ background: '#0f172a', color: '#ffffff' }}>
                     {acc.name} ({acc.type}) — ₹{acc.current_balance?.toLocaleString('en-IN') || 0}
                   </option>
                 ))
@@ -196,10 +247,10 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* Date */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label style={labelStyle}>
               Date *
             </label>
             <input
@@ -207,33 +258,33 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+              style={inputStyle}
             />
           </div>
 
           {/* Payment Method */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label style={labelStyle}>
               Payment Method
             </label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+              style={inputStyle}
             >
-              <option value="UPI">UPI / NetBanking</option>
-              <option value="Debit Card">Debit Card</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Cash">Cash</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Other">Other</option>
+              <option value="UPI" style={{ background: '#0f172a', color: '#ffffff' }}>UPI / NetBanking</option>
+              <option value="Debit Card" style={{ background: '#0f172a', color: '#ffffff' }}>Debit Card</option>
+              <option value="Credit Card" style={{ background: '#0f172a', color: '#ffffff' }}>Credit Card</option>
+              <option value="Cash" style={{ background: '#0f172a', color: '#ffffff' }}>Cash</option>
+              <option value="Bank Transfer" style={{ background: '#0f172a', color: '#ffffff' }}>Bank Transfer</option>
+              <option value="Other" style={{ background: '#0f172a', color: '#ffffff' }}>Other</option>
             </select>
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+          <label style={labelStyle}>
             Description / Title
           </label>
           <input
@@ -241,13 +292,13 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
             placeholder={type === 'income' ? 'e.g., Monthly Salary' : 'e.g., Grocery Shopping'}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+            style={inputStyle}
           />
         </div>
 
         {/* Merchant */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+          <label style={labelStyle}>
             Payee / Merchant (Optional)
           </label>
           <input
@@ -255,26 +306,38 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
             placeholder="e.g., Amazon, Starbucks, HDFC Bank"
             value={merchant}
             onChange={(e) => setMerchant(e.target.value)}
-            className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
+            style={inputStyle}
           />
         </div>
 
         {/* Submit Button */}
-        <div className="pt-3">
+        <div style={{ paddingTop: '6px' }}>
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-lg transition flex items-center justify-center gap-2 ${
-              type === 'income'
-                ? 'bg-emerald-600 hover:bg-emerald-500'
-                : 'bg-red-600 hover:bg-red-500'
-            }`}
+            style={{
+              width: '100%',
+              padding: '12px 18px',
+              borderRadius: '12px',
+              fontWeight: 800,
+              fontSize: '0.95rem',
+              color: '#ffffff',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              background: type === 'income' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              boxShadow: type === 'income' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : '0 4px 14px rgba(239, 68, 68, 0.4)',
+              transition: 'all 0.2s ease'
+            }}
           >
             {loading ? (
               'Saving Record...'
             ) : (
               <>
-                <FiCheck className="w-5 h-5" /> Save {type === 'income' ? 'Income' : 'Expense'}
+                <FiCheck style={{ width: '18px', height: '18px' }} /> Save {type === 'income' ? 'Income' : 'Expense'}
               </>
             )}
           </button>

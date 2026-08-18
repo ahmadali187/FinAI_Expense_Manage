@@ -2,15 +2,23 @@ import React from 'react';
 
 const SkeletonLoader = ({ type = 'card', count = 3 }) => {
   return (
-    <div className="space-y-4 animate-pulse">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {Array.from({ length: count }).map((_, idx) => (
         <div
           key={idx}
-          className="bg-slate-800/60 border border-slate-800 rounded-2xl p-5 space-y-3"
+          style={{
+            background: 'rgba(30, 41, 59, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '16px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}
         >
-          <div className="h-4 bg-slate-700/60 rounded-md w-1/3"></div>
-          <div className="h-8 bg-slate-700/40 rounded-md w-2/3"></div>
-          <div className="h-3 bg-slate-700/30 rounded-md w-1/2"></div>
+          <div style={{ height: '14px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '6px', width: '35%' }}></div>
+          <div style={{ height: '24px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '6px', width: '60%' }}></div>
+          <div style={{ height: '12px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '6px', width: '45%' }}></div>
         </div>
       ))}
     </div>
