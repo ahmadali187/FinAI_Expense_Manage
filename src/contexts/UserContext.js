@@ -99,21 +99,26 @@ export const UserProvider = ({ children }) => {
             setLoggedInUser(res.user);
             localStorage.setItem('loggedInUser', JSON.stringify(res.user));
           } else {
-            await autoGuestLogin();
+            localStorage.removeItem('finai_auth_token');
+            localStorage.removeItem('loggedInUser');
+            setLoggedInUser(null);
           }
         } catch (err) {
-          console.warn("Token expired or invalid, auto authenticating guest session:", err);
-          await autoGuestLogin();
+          console.warn("Token expired or invalid:", err);
+          localStorage.removeItem('finai_auth_token');
+          localStorage.removeItem('loggedInUser');
+          setLoggedInUser(null);
         }
       } else {
-        await autoGuestLogin();
+        setLoggedInUser(null);
       }
     };
     checkUserSession();
-  }, [autoGuestLogin]);
+  }, []);
+
 
   return (
-    <UserContext.Provider value={{ loggedInUser, lastUserEmail, login, loginWithGoogle, logout, register, setLastUserEmail }}>
+    <UserContext.Provider value={{ loggedInUser, lastUserEmail, login, loginWithGoogle, logout, register, autoGuestLogin, setLastUserEmail }}>
       {children}
     </UserContext.Provider>
   );

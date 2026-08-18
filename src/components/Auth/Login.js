@@ -41,7 +41,11 @@ const Login = () => {
       setLoading(true);
       const loggedIn = await login(email, password);
       if (loggedIn) {
-        navigate('/dashboard');
+        if (loggedIn.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         setError('Invalid email or password.');
       }
@@ -59,8 +63,12 @@ const Login = () => {
       setError('');
       if (credentialResponse.credential) {
         const profile = decodeGoogleCredential(credentialResponse.credential);
-        await loginWithGoogle(profile);
-        navigate('/dashboard');
+        const loggedIn = await loginWithGoogle(profile);
+        if (loggedIn && loggedIn.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         setError('Google authentication credential missing.');
       }
@@ -71,6 +79,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="glass-card" style={{ maxWidth: '440px', margin: '40px auto' }}>

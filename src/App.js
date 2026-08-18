@@ -4,21 +4,17 @@ import { TransactionsProvider } from './contexts/TransactionsContext';
 import { BudgetsProvider } from './contexts/BudgetsContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaRobot, FaBars, FaTimes } from 'react-icons/fa';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/App.css';
 
-import Sidebar from './components/Layout/Sidebar';
-import ProtectedRoute from './components/Layout/ProtectedRoute';
+import ProtectedUserRoute from './components/Layout/ProtectedUserRoute';
+import ProtectedAdminRoute from './components/Layout/ProtectedAdminRoute';
+import UserLayout from './components/Layout/UserLayout';
+import AdminLayout from './components/Layout/AdminLayout';
 import SplashScreen from './components/Layout/SplashScreen';
-import CommandPalette from './components/common/CommandPalette';
-import AiAssistantModal from './components/AI/AiAssistantModal';
-import ReceiptScannerModal from './components/AI/ReceiptScannerModal';
-import CurrencyConverterModal from './components/Finance/CurrencyConverterModal';
-import CentralCreateModal from './components/common/CentralCreateModal';
-import MobileNavbar from './components/Layout/MobileNavbar';
+import NotFound from './components/common/NotFound';
 
 // Page Components
 import Login from './components/Auth/Login';
@@ -35,13 +31,30 @@ import { SocketProvider } from './contexts/SocketContext';
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '1026999155282-1am1jufbqvr48md1thi4k683din17m88.apps.googleusercontent.com';
 
 const Home = () => (
-  <div style={{ maxWidth: '600px', margin: '60px auto', textAlign: 'center' }} className="glass-card">
-    <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 800 }}>FinAI — AI Personal Finance Copilot</h1>
-    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: '20px 0' }}>
-      Connected financial intelligence, accounts management, safe-to-spend guidance, and natural language expense parsing.
+  <div style={{ maxWidth: '640px', margin: '60px auto', textAlign: 'center', padding: '0 20px' }} className="glass-card">
+    <div style={{
+      width: '60px',
+      height: '60px',
+      borderRadius: '16px',
+      background: 'linear-gradient(135deg, #4f46e5 0%, #9333ea 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: '0 auto 20px auto',
+      color: '#fff',
+      fontSize: '1.8rem',
+      fontWeight: 800
+    }}>
+      Fin
+    </div>
+    <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', letterSpacing: '-0.5px' }}>
+      FinAI — AI Personal Finance Copilot
+    </h1>
+    <p style={{ color: 'var(--text-secondary, #cbd5e1)', fontSize: '1.05rem', margin: '0 0 28px 0', lineHeight: 1.6 }}>
+      Understand your money. Track expenses, manage budgets, monitor goals, and get personalized AI-powered financial guidance.
     </p>
-    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-      <Link to="/login" className="btn-gradient-primary">Login to App</Link>
+    <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <Link to="/login" className="btn-gradient-primary">Sign In to Account</Link>
       <Link to="/register" className="btn-glass-secondary">Create Free Account</Link>
     </div>
   </div>
@@ -72,18 +85,6 @@ function App() {
 const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Global Tool Modals
-  const [showCmdPalette, setShowCmdPalette] = useState(false);
-  const [showAiAssistant, setShowAiAssistant] = useState(false);
-  const [showReceiptScanner, setShowReceiptScanner] = useState(false);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
-
-  const noSidebarPaths = ['/login', '/register', '/'];
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const showSidebar = !noSidebarPaths.includes(location.pathname) && !isAdminRoute;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,117 +94,49 @@ const AppContent = () => {
   }, []);
 
   const pageVariants = {
-    initial: { opacity: 0, y: 15 },
+    initial: { opacity: 0, y: 10 },
     in: { opacity: 1, y: 0 },
-    out: { opacity: 0, y: -15 }
+    out: { opacity: 0, y: -10 }
   };
 
-  const pageTransition = { duration: 0.3, ease: "easeOut" };
+  const pageTransition = { duration: 0.25, ease: "easeOut" };
 
   return (
     <AnimatePresence>
       {showSplash ? (
         <SplashScreen key="splash" />
       ) : (
-        <div className="app-layout">
-          {/* Mobile Sidebar Toggle Button */}
-          {showSidebar && (
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="mobile-toggle-btn"
-              title="Toggle Menu"
-            >
-              {isSidebarOpen ? <FaTimes /> : <FaBars />}
-            </button>
-          )}
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            {/* Public Unauthenticated Routes */}
+            <Route path="/" element={<motion.div key="home" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Home /></motion.div>} />
+            <Route path="/login" element={<motion.div key="login" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Login /></motion.div>} />
+            <Route path="/register" element={<motion.div key="register" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Register /></motion.div>} />
 
-          {/* Mobile Overlay Backdrop */}
-          {showSidebar && isSidebarOpen && (
-            <div
-              className="mobile-sidebar-overlay"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
+            {/* Protected Normal User Routes */}
+            <Route element={<ProtectedUserRoute />}>
+              <Route element={<UserLayout />}>
+                <Route path="/dashboard" element={<motion.div key="dashboard" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Dashboard /></motion.div>} />
+                <Route path="/accounts" element={<motion.div key="accounts" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><AccountsPage /></motion.div>} />
+                <Route path="/settings" element={<motion.div key="settings" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><SettingsPage /></motion.div>} />
+                <Route path="/profile" element={<motion.div key="profile" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ProfilePage /></motion.div>} />
+                <Route path="/report" element={<motion.div key="report" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ReportPage /></motion.div>} />
+                <Route path="/finai" element={<motion.div key="finai" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Dashboard /></motion.div>} />
+              </Route>
+            </Route>
 
-          {showSidebar && (
-            <Sidebar
-              isOpen={isSidebarOpen}
-              onClose={() => setIsSidebarOpen(false)}
-              onOpenCmdPalette={() => setShowCmdPalette(true)}
-              onOpenAi={() => setShowAiAssistant(true)}
-            />
-          )}
+            {/* Protected Admin Routes */}
+            <Route element={<ProtectedAdminRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin" element={<motion.div key="admin-root" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><AdminDashboard /></motion.div>} />
+                <Route path="/admin/*" element={<motion.div key="admin-sub" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><AdminDashboard /></motion.div>} />
+              </Route>
+            </Route>
 
-          <main className={showSidebar ? "content-with-sidebar" : "content-full-width"}>
-            <AnimatePresence mode="wait">
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<motion.div key="home" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Home /></motion.div>} />
-                <Route path="/login" element={<motion.div key="login" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Login /></motion.div>} />
-                <Route path="/register" element={<motion.div key="register" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Register /></motion.div>} />
-
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<motion.div key="dashboard" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Dashboard /></motion.div>} />
-                  <Route path="/accounts" element={<motion.div key="accounts" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><AccountsPage /></motion.div>} />
-                  <Route path="/settings" element={<motion.div key="settings" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><SettingsPage /></motion.div>} />
-                  <Route path="/profile" element={<motion.div key="profile" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ProfilePage /></motion.div>} />
-                  <Route path="/report" element={<motion.div key="report" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ReportPage /></motion.div>} />
-                  <Route path="/admin/*" element={<motion.div key="admin" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><AdminDashboard /></motion.div>} />
-                </Route>
-
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AnimatePresence>
-          </main>
-
-          {/* Bottom Mobile Navigation */}
-          {showSidebar && (
-            <MobileNavbar
-              onOpenQuickAdd={() => setShowQuickAdd(true)}
-              onOpenAi={() => setShowAiAssistant(true)}
-            />
-          )}
-
-          {/* Floating AI Assistant Trigger Button */}
-          {showSidebar && (
-            <button
-              className="floating-ai-btn"
-              onClick={() => setShowAiAssistant(true)}
-              title="Ask FinAI Assistant (Cmd+K)"
-            >
-              <FaRobot />
-            </button>
-          )}
-
-          {/* Global Modals */}
-          <CommandPalette
-            isOpen={showCmdPalette}
-            onClose={() => setShowCmdPalette(false)}
-            onOpenAi={() => setShowAiAssistant(true)}
-            onOpenAddModal={() => setShowQuickAdd(true)}
-            onOpenCurrencyModal={() => setShowCurrencyModal(true)}
-            onOpenReceiptScanner={() => setShowReceiptScanner(true)}
-          />
-
-          <AiAssistantModal
-            isOpen={showAiAssistant}
-            onClose={() => setShowAiAssistant(false)}
-          />
-
-          <CentralCreateModal
-            isOpen={showQuickAdd}
-            onClose={() => setShowQuickAdd(false)}
-          />
-
-          <ReceiptScannerModal
-            isOpen={showReceiptScanner}
-            onClose={() => setShowReceiptScanner(false)}
-          />
-
-          <CurrencyConverterModal
-            isOpen={showCurrencyModal}
-            onClose={() => setShowCurrencyModal(false)}
-          />
-        </div>
+            {/* Catch-all 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AnimatePresence>
       )}
     </AnimatePresence>
   );

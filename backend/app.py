@@ -26,7 +26,7 @@ JWT_SECRET = os.environ.get('JWT_SECRET')
 if not JWT_SECRET or JWT_SECRET.strip() in UNSAFE_SECRETS:
     raise RuntimeError("JWT_SECRET environment variable is required and must not be set to a default or predictable value.")
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room, disconnect
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -179,8 +179,18 @@ with app.app_context():
 
     ensure_admin_user()
 
-@app.route('/')
-def index():
+build_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'build')
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_spa_or_api_status(path):
+    if path.startswith('api/') or path == 'api':
+        return jsonify({'message': 'API endpoint not found'}), 404
+    if os.path.exists(build_dir):
+        if path != "" and os.path.exists(os.path.join(build_dir, path)):
+            return send_from_directory(build_dir, path)
+        return send_from_directory(build_dir, 'index.html')
+
     render_url = os.environ.get('RENDER_EXTERNAL_URL')
     env_api_url = os.environ.get('BACKEND_PUBLIC_URL') or os.environ.get('REACT_APP_API_URL') or os.environ.get('VITE_API_URL')
     if render_url:
@@ -196,6 +206,7 @@ def index():
         'version': '1.0.0',
         'api_base_url': api_base_url
     })
+
 
 # --- Auth Token Middleware ---
 def token_required(f):

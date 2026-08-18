@@ -26,8 +26,10 @@ const ModalPortal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) =
 
   return ReactDOM.createPortal(
     <div 
-      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn"
+      style={{ zIndex: 1000 }}
       onClick={(e) => {
+
         if (e.target === e.currentTarget && onClose) {
           onClose();
         }

@@ -3,8 +3,23 @@ import { CurrencyContext } from '../../contexts/CurrencyContext';
 import * as api from '../../services/api';
 import { 
   FaWallet, FaUniversity, FaCreditCard, FaMoneyBillWave, FaPlus, 
-  FaEdit, FaTrashAlt, FaArchive, FaUndo, FaPiggyBank, FaChartLine, FaLandmark, FaExchangeAlt, FaTimes, FaExclamationTriangle
+  FaEdit, FaTrashAlt, FaArchive, FaUndo, FaPiggyBank, FaExclamationTriangle
 } from 'react-icons/fa';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Select from '../ui/Select';
+import Modal from '../ui/Modal';
+import Badge from '../ui/Badge';
+import Card from '../ui/Card';
+
+const ACCOUNT_TYPES = [
+  { value: 'Bank Account', label: 'Bank Account' },
+  { value: 'Credit Card', label: 'Credit Card' },
+  { value: 'Cash', label: 'Cash / Physical Wallet' },
+  { value: 'UPI Wallet', label: 'UPI / Digital Wallet' },
+  { value: 'Savings / Investment', label: 'Savings & Investment' },
+  { value: 'Other', label: 'Other' }
+];
 
 const AccountsPage = () => {
   const { formatAmount } = useContext(CurrencyContext);
@@ -23,8 +38,7 @@ const AccountsPage = () => {
   const [institutionName, setInstitutionName] = useState('');
   const [lastFour, setLastFour] = useState('');
   const [openingBalance, setOpeningBalance] = useState('');
-  const [color, setColor] = useState('#3B82F6');
-  const [notes, setNotes] = useState('');
+  const [color, setColor] = useState('#4f46e5');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,8 +61,7 @@ const AccountsPage = () => {
     setInstitutionName('');
     setLastFour('');
     setOpeningBalance('');
-    setColor('#3B82F6');
-    setNotes('');
+    setColor('#4f46e5');
     setEditingAcc(null);
     setError('');
   };
@@ -65,8 +78,7 @@ const AccountsPage = () => {
     setInstitutionName(acc.institution_name || '');
     setLastFour(acc.last_four || '');
     setOpeningBalance(acc.opening_balance || 0);
-    setColor(acc.color || '#3B82F6');
-    setNotes(acc.notes || '');
+    setColor(acc.color || '#4f46e5');
     setError('');
     setShowAddModal(true);
   };
@@ -87,8 +99,7 @@ const AccountsPage = () => {
         institution_name: institutionName,
         last_four: lastFour,
         opening_balance: parseFloat(openingBalance || 0),
-        color,
-        notes
+        color
       };
 
       if (editingAcc) {
@@ -101,412 +112,363 @@ const AccountsPage = () => {
       resetForm();
       fetchAccounts();
     } catch (err) {
-      console.error('Error saving account:', err);
       setError(err.message || 'Failed to save account.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteClick = async (acc) => {
+  const handleArchive = async (acc) => {
     try {
-      await api.deleteAccount(acc.id);
-      fetchAccounts();
-    } catch (err) {
-      if (err.message && err.message.includes('transaction')) {
-        setDeleteConfirmAcc(acc);
-        setTxCountNotice(err.message);
+      if (acc.is_archived) {
+        await api.restoreAccount(acc.id);
       } else {
-        alert(err.message || 'Unable to delete account.');
+        await api.archiveAccount(acc.id);
       }
+      fetchAccounts();
+    } catch (err) {
+      alert(err.message || 'Failed to update account archive status');
     }
   };
 
-  const handleArchiveAccount = async (accId) => {
+  const handleDeleteClick = (acc) => {
+    setDeleteConfirmAcc(acc);
+    setTxCountNotice(acc.transaction_count || 0);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmAcc) return;
     try {
-      await api.archiveAccount(accId);
+      setLoading(true);
+      await api.deleteAccount(deleteConfirmAcc.id);
       setDeleteConfirmAcc(null);
-      setTxCountNotice(null);
       fetchAccounts();
     } catch (err) {
-      console.error('Error archiving account:', err);
+      alert(err.message || 'Failed to delete account.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleForceDeleteAccount = async (accId) => {
-    try {
-      await api.deleteAccount(accId, 'delete_all');
-      setDeleteConfirmAcc(null);
-      setTxCountNotice(null);
-      fetchAccounts();
-    } catch (err) {
-      console.error('Error deleting account and transactions:', err);
-    }
-  };
-
-  const handleRestoreAccount = async (accId) => {
-    try {
-      await api.restoreAccount(accId);
-      fetchAccounts();
-    } catch (err) {
-      console.error('Error restoring account:', err);
-    }
-  };
+  // Metrics
+  const activeAccounts = accounts.filter(a => !a.is_archived);
+  const archivedAccounts = accounts.filter(a => a.is_archived);
+  const totalLiquidity = activeAccounts.reduce((sum, a) => sum + (parseFloat(a.current_balance || a.opening_balance) || 0), 0);
 
   const getAccountIcon = (accType) => {
     switch (accType) {
+      case 'Credit Card': return <FaCreditCard color="#f472b6" />;
+      case 'Cash': return <FaMoneyBillWave color="#34d399" />;
+      case 'UPI Wallet': return <FaWallet color="#38bdf8" />;
+      case 'Savings / Investment': return <FaPiggyBank color="#fbbf24" />;
       case 'Bank Account':
-      case 'Bank': return <FaUniversity className="text-indigo-400 text-xl" />;
-      case 'Credit Card':
-      case 'Debit Card': return <FaCreditCard className="text-red-400 text-xl" />;
-      case 'Cash': return <FaMoneyBillWave className="text-emerald-400 text-xl" />;
-      case 'UPI': return <FaExchangeAlt className="text-purple-400 text-xl" />;
-      case 'Wallet': return <FaWallet className="text-blue-400 text-xl" />;
-      case 'Investment': return <FaChartLine className="text-amber-400 text-xl" />;
-      case 'Loan': return <FaLandmark className="text-rose-400 text-xl" />;
-      default: return <FaPiggyBank className="text-cyan-400 text-xl" />;
+      default: return <FaUniversity color="#818cf8" />;
     }
   };
 
-  const activeAccounts = accounts.filter(a => !a.is_archived);
-  const archivedAccounts = accounts.filter(a => a.is_archived);
-  const totalBalance = activeAccounts.reduce((sum, a) => sum + (a.current_balance || 0), 0);
-
   return (
-    <div className="space-y-6 pb-24">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '16px',
+        marginBottom: '28px'
+      }}>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
             Accounts & Wallets
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Manage your bank accounts, credit cards, UPI, and cash balances.
+          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+            Manage your liquid assets, bank accounts, cards, and UPI wallets in one centralized hub.
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <button
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button
+            variant="secondary"
+            size="md"
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-3 py-2 text-xs font-semibold rounded-xl border transition ${
-              showArchived
-                ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-            }`}
           >
-            {showArchived ? 'Hide Archived' : `Archived (${archivedAccounts.length})`}
-          </button>
-
-          <button
+            {showArchived ? 'Hide Archived' : `Show Archived (${archivedAccounts.length})`}
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            icon={FaPlus}
             onClick={handleOpenAdd}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition"
           >
-            <FaPlus /> Add New Account
-          </button>
+            Add Account
+          </Button>
         </div>
       </div>
 
-      {/* Summary Card */}
-      <div className="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Total Net Liquidity</div>
-        <div className="text-3xl sm:text-4xl font-black text-white mt-1 mb-2">{formatAmount(totalBalance)}</div>
-        <div className="text-xs text-slate-400">
-          Active Accounts: <span className="text-white font-bold">{activeAccounts.length}</span>
-        </div>
+      {/* Top Metric Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
+        <Card style={{ background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(15, 23, 42, 0.6))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            TOTAL LIQUIDITY
+          </span>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+            {formatAmount(totalLiquidity)}
+          </h2>
+        </Card>
+
+        <Card style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.6))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            ACTIVE ACCOUNTS
+          </span>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+            {activeAccounts.length}
+          </h2>
+        </Card>
+
+        <Card style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(15, 23, 42, 0.6))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            ARCHIVED ACCOUNTS
+          </span>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+            {archivedAccounts.length}
+          </h2>
+        </Card>
       </div>
 
-      {/* Empty State */}
-      {accounts.length === 0 && (
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-10 text-center space-y-4">
-          <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-2xl">
-            <FaWallet />
+      {/* Account Cards List */}
+      {accounts.length === 0 ? (
+        <Card style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+            <FaWallet size={26} />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">No accounts yet</h3>
-            <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">
-              Add your first bank account, cash wallet, or UPI account to begin tracking your finances seamlessly.
-            </p>
-          </div>
-          <button
-            onClick={handleOpenAdd}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg transition inline-flex items-center gap-2"
-          >
-            <FaPlus /> Add Your First Account
-          </button>
-        </div>
-      )}
-
-      {/* Active Accounts Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {activeAccounts.map(acc => (
-          <div
-            key={acc.id}
-            className="bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 shadow-lg transition flex flex-col justify-between relative group"
-            style={{ borderLeft: `4px solid ${acc.color || '#3B82F6'}` }}
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', margin: '0 0 8px 0' }}>
+            No accounts found
+          </h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0 0 20px 0', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+            Add your bank accounts, cash balances, or UPI wallets to begin tracking transactions accurately.
+          </p>
+          <Button variant="primary" icon={FaPlus} onClick={handleOpenAdd}>
+            Create Your First Account
+          </Button>
+        </Card>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '24px'
+        }}>
+          {accounts.map(acc => (
+            <Card
+              key={acc.id}
+              style={{
+                borderLeft: `4px solid ${acc.color || '#4f46e5'}`,
+                opacity: acc.is_archived ? 0.65 : 1
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '10px',
+                    background: 'rgba(15, 23, 42, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px'
+                  }}>
                     {getAccountIcon(acc.type)}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white leading-tight">{acc.name}</h3>
-                    <span className="text-xs text-slate-400">
-                      {acc.type} {acc.institution_name ? `• ${acc.institution_name}` : ''}
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                      {acc.name}
+                    </h3>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                      {acc.institution_name ? `${acc.institution_name} • ` : ''}{acc.type} {acc.last_four ? `(•••• ${acc.last_four})` : ''}
                     </span>
                   </div>
                 </div>
+                {acc.is_archived && <Badge variant="warning">Archived</Badge>}
+              </div>
 
-                <div className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition">
+              <div style={{ margin: '16px 0 20px 0' }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>
+                  CURRENT BALANCE
+                </span>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                  {formatAmount(acc.current_balance !== undefined ? acc.current_balance : acc.opening_balance)}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingTop: '14px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+              }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  {acc.transaction_count || 0} transactions recorded
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={() => handleOpenEdit(acc)}
-                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg text-xs"
                     title="Edit Account"
+                    style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '6px' }}
                   >
-                    <FaEdit />
+                    <FaEdit size={15} />
                   </button>
                   <button
-                    onClick={() => handleArchiveAccount(acc.id)}
-                    className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg text-xs"
-                    title="Archive Account"
+                    onClick={() => handleArchive(acc)}
+                    title={acc.is_archived ? "Restore Account" : "Archive Account"}
+                    style={{ background: 'transparent', border: 'none', color: acc.is_archived ? '#34d399' : '#fbbf24', cursor: 'pointer', padding: '6px' }}
                   >
-                    <FaArchive />
+                    {acc.is_archived ? <FaUndo size={15} /> : <FaArchive size={15} />}
                   </button>
                   <button
                     onClick={() => handleDeleteClick(acc)}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg text-xs"
                     title="Delete Account"
+                    style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '6px' }}
                   >
-                    <FaTrashAlt />
+                    <FaTrashAlt size={15} />
                   </button>
                 </div>
               </div>
-
-              {acc.last_four && (
-                <div className="text-xs text-slate-500 mb-2 font-mono">•••• {acc.last_four}</div>
-              )}
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-end justify-between">
-              <div>
-                <span className="text-xs text-slate-400 block">Current Balance</span>
-                <span className={`text-xl font-black ${acc.current_balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {formatAmount(acc.current_balance)}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Archived Accounts Section */}
-      {showArchived && archivedAccounts.length > 0 && (
-        <div className="mt-8 space-y-4">
-          <h2 className="text-lg font-bold text-slate-300 flex items-center gap-2">
-            <FaArchive className="text-amber-400" /> Archived Accounts ({archivedAccounts.length})
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {archivedAccounts.map(acc => (
-              <div key={acc.id} className="bg-slate-950/60 border border-slate-800/60 rounded-2xl p-4 opacity-75">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    {getAccountIcon(acc.type)}
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-300">{acc.name}</h4>
-                      <span className="text-xs text-slate-500">Archived</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleRestoreAccount(acc.id)}
-                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-indigo-400 rounded-lg flex items-center gap-1 font-semibold"
-                  >
-                    <FaUndo /> Restore
-                  </button>
-                </div>
-                <div className="text-base font-bold text-slate-400">{formatAmount(acc.current_balance)}</div>
-              </div>
-            ))}
-          </div>
+            </Card>
+          ))}
         </div>
       )}
 
       {/* Add / Edit Account Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative my-8">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition"
-            >
-              <FaTimes />
-            </button>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title={editingAcc ? "Edit Account" : "Add New Financial Account"}
+        maxWidth="500px"
+      >
+        <form onSubmit={handleSaveSubmit}>
+          {error && (
+            <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '8px', color: '#f87171', fontSize: '0.85rem', marginBottom: '16px' }}>
+              {error}
+            </div>
+          )}
 
-            <h2 className="text-xl font-bold text-white mb-4">
-              {editingAcc ? 'Edit Account' : 'Add New Account'}
-            </h2>
+          <Input
+            label="Account Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. HDFC Salary Account, Cash Wallet"
+            required
+          />
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-                {error}
-              </div>
+          <Select
+            label="Account Type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            options={ACCOUNT_TYPES}
+            required
+          />
+
+          <Input
+            label="Financial Institution (Optional)"
+            value={institutionName}
+            onChange={(e) => setInstitutionName(e.target.value)}
+            placeholder="e.g. HDFC Bank, SBI, ICICI"
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <Input
+              label="Opening Balance"
+              type="number"
+              step="0.01"
+              value={openingBalance}
+              onChange={(e) => setOpeningBalance(e.target.value)}
+              placeholder="0.00"
+            />
+            <Input
+              label="Last 4 Digits (Optional)"
+              value={lastFour}
+              onChange={(e) => setLastFour(e.target.value)}
+              placeholder="e.g. 4321"
+              maxLength={4}
+            />
+          </div>
+
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit" loading={loading}>
+              {editingAcc ? "Update Account" : "Create Account"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete / Archive Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteConfirmAcc}
+        onClose={() => setDeleteConfirmAcc(null)}
+        title="Confirm Account Deletion"
+        maxWidth="480px"
+      >
+        <div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '14px',
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '10px',
+            color: '#f87171',
+            marginBottom: '16px'
+          }}>
+            <FaExclamationTriangle size={24} style={{ flexShrink: 0 }} />
+            <div style={{ fontSize: '0.88rem' }}>
+              Are you sure you want to permanently delete <strong>{deleteConfirmAcc?.name}</strong>?
+              {txCountNotice > 0 && (
+                <div style={{ marginTop: '6px', fontWeight: 600 }}>
+                  This account has {txCountNotice} financial transaction records associated with it. Deleting will erase all history.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: '0 0 20px 0' }}>
+            {txCountNotice > 0 ? "Consider archiving this account instead to preserve your historic budget and cash flow reports." : "This action cannot be undone."}
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button variant="secondary" onClick={() => setDeleteConfirmAcc(null)}>
+              Cancel
+            </Button>
+
+            {txCountNotice > 0 && (
+              <Button
+                variant="warning"
+                onClick={() => {
+                  handleArchive(deleteConfirmAcc);
+                  setDeleteConfirmAcc(null);
+                }}
+              >
+                Archive Account Instead
+              </Button>
             )}
 
-            <form onSubmit={handleSaveSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                  Account Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. HDFC Bank, Salary Account"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  required
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    Account Type *
-                  </label>
-                  <select
-                    value={type}
-                    onChange={e => setType(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="Bank Account">Bank Account</option>
-                    <option value="Cash">Cash Wallet</option>
-                    <option value="UPI">UPI Account</option>
-                    <option value="Wallet">Digital Wallet</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="Investment">Investment</option>
-                    <option value="Loan">Loan Account</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    Opening Balance (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={openingBalance}
-                    onChange={e => setOpeningBalance(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    Institution / Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. HDFC, ICICI, SBI"
-                    value={institutionName}
-                    onChange={e => setInstitutionName(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    Last 4 Digits (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    maxLength="4"
-                    placeholder="e.g. 4321"
-                    value={lastFour}
-                    onChange={e => setLastFour(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                  Card Theme Color
-                </label>
-                <div className="flex items-center gap-3">
-                  {['#3B82F6', '#10B981', '#6366F1', '#8B5CF6', '#EF4444', '#F59E0B', '#06B6D4'].map(c => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setColor(c)}
-                      className={`w-7 h-7 rounded-full transition transform ${color === c ? 'scale-125 ring-2 ring-white' : ''}`}
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-3">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition"
-                >
-                  {loading ? 'Saving...' : editingAcc ? 'Update Account' : 'Save Account'}
-                </button>
-              </div>
-            </form>
+            <Button variant="danger" loading={loading} onClick={confirmDelete}>
+              Permanently Delete
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
 
-      {/* Safe Delete Modal */}
-      {deleteConfirmAcc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-amber-400">
-              <FaExclamationTriangle className="text-2xl" />
-              <h3 className="text-lg font-bold text-white">Account Deletion Safety</h3>
-            </div>
-
-            <p className="text-sm text-slate-300 leading-relaxed">
-              {txCountNotice || `This account contains existing transactions.`}
-            </p>
-
-            <p className="text-xs text-slate-400">
-              We recommend archiving the account to preserve your historical financial reports and statements.
-            </p>
-
-            <div className="flex flex-col gap-2 pt-2">
-              <button
-                onClick={() => handleArchiveAccount(deleteConfirmAcc.id)}
-                className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm rounded-xl transition"
-              >
-                Archive Account (Recommended)
-              </button>
-
-              <button
-                onClick={() => handleForceDeleteAccount(deleteConfirmAcc.id)}
-                className="w-full py-2.5 bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 text-red-300 font-bold text-sm rounded-xl transition"
-              >
-                Delete Account & Transactions
-              </button>
-
-              <button
-                onClick={() => setDeleteConfirmAcc(null)}
-                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm rounded-xl transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

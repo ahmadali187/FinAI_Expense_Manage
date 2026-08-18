@@ -2,9 +2,29 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { CurrencyContext } from '../../contexts/CurrencyContext';
 import * as api from '../../services/api';
 import { 
-  FaFileInvoiceDollar, FaFilter, 
-  FaFileCsv, FaPrint, FaArrowUp, FaArrowDown
+  FaFilter, FaFileCsv, FaPrint, FaArrowUp, FaArrowDown, FaReceipt
 } from 'react-icons/fa';
+import Button from '../ui/Button';
+import Select from '../ui/Select';
+import Input from '../ui/Input';
+import Card from '../ui/Card';
+import Badge from '../ui/Badge';
+
+const DATE_PRESETS = [
+  { value: 'today', label: 'Today' },
+  { value: 'this_week', label: 'This Week' },
+  { value: 'this_month', label: 'This Month' },
+  { value: 'last_month', label: 'Last Month' },
+  { value: 'last_3_months', label: 'Last 3 Months' },
+  { value: 'this_year', label: 'This Year' },
+  { value: 'custom', label: 'Custom Range' }
+];
+
+const TYPE_OPTIONS = [
+  { value: 'all', label: 'All Types (Income & Expenses)' },
+  { value: 'expense', label: 'Expenses Only' },
+  { value: 'income', label: 'Income Only' }
+];
 
 const ReportPage = () => {
   const { formatAmount } = useContext(CurrencyContext);
@@ -22,13 +42,15 @@ const ReportPage = () => {
   const [toDate, setToDate] = useState(getToday());
   const [selectedPreset, setSelectedPreset] = useState('this_month');
   const [selectedAccount, setSelectedAccount] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
 
   const [accounts, setAccounts] = useState([]);
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+
 
   const fetchAccountsList = async () => {
     try {
@@ -98,7 +120,7 @@ const ReportPage = () => {
         end = new Date();
         break;
       default:
-        break;
+        return;
     }
 
     setFromDate(start.toISOString().split('T')[0]);
@@ -107,20 +129,21 @@ const ReportPage = () => {
 
   const handleExportCSV = () => {
     if (!reportData || !reportData.transactions || reportData.transactions.length === 0) {
-      alert('No transaction data available to export.');
+      alert('No transaction records available to export.');
       return;
     }
 
-    const headers = ['Date', 'Description', 'Category', 'Type', 'Amount (INR)'];
+    const headers = ['Date', 'Category', 'Description', 'Type', 'Amount', 'Account'];
     const rows = reportData.transactions.map(t => [
-      t.date ? t.date.split('T')[0] : '',
-      `"${(t.description || '').replace(/"/g, '""')}"`,
-      t.category || '',
+      t.date || '',
+      `"${t.category || ''}"`,
+      `"${t.description || ''}"`,
       t.type || '',
-      t.amount || 0
+      t.amount || 0,
+      `"${t.account_name || ''}"`
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -134,289 +157,273 @@ const ReportPage = () => {
     window.print();
   };
 
-  const categoriesList = [
-    'Food', 'Transport', 'Utilities', 'Entertainment', 'Shopping', 
-    'Health', 'Housing', 'Education', 'Salary', 'Freelance', 'Investments', 'Other'
+  const summary = reportData?.summary || {
+    total_income: 0,
+    total_expenses: 0,
+    net_cash_flow: 0,
+    savings_rate: 0,
+    transaction_count: 0,
+    avg_daily_spend: 0
+  };
+
+  const categoriesBreakdown = reportData?.category_breakdown || [];
+  const transactionsList = reportData?.transactions || [];
+
+  const accountOptions = [
+    { value: 'all', label: 'All Accounts' },
+    ...accounts.map(a => ({ value: a.id, label: a.name }))
   ];
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '16px',
+        marginBottom: '28px'
+      }}>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <FaFileInvoiceDollar className="text-indigo-400" /> Financial Reports
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+            Financial Reports
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Generate, analyze, and export date-driven financial statements and expense breakdowns.
+          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+            Understand where your money goes with cash flow metrics and detailed transaction breakdowns.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportCSV}
-            className="px-3.5 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl flex items-center gap-2 transition"
-          >
-            <FaFileCsv className="text-sm" /> Export CSV
-          </button>
-          <button
-            onClick={handlePrint}
-            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition"
-          >
-            <FaPrint className="text-sm" /> Print / PDF
-          </button>
-        </div>
-      </div>
-
-      {/* Report Filter Controls Card */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-        {/* Date Range Quick Presets */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {[
-            { key: 'today', label: 'Today' },
-            { key: 'this_week', label: 'This Week' },
-            { key: 'this_month', label: 'This Month' },
-            { key: 'last_month', label: 'Last Month' },
-            { key: 'last_3_months', label: 'Last 3 Months' },
-            { key: 'this_year', label: 'This Year' }
-          ].map(preset => (
-            <button
-              key={preset.key}
-              onClick={() => handlePresetSelect(preset.key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                selectedPreset === preset.key
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Date & Filter Controls */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-slate-800">
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">From Date</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={e => {
-                setFromDate(e.target.value);
-                setSelectedPreset('custom');
-              }}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">To Date</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={e => {
-                setToDate(e.target.value);
-                setSelectedPreset('custom');
-              }}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Account Filter</label>
-            <select
-              value={selectedAccount}
-              onChange={e => setSelectedAccount(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
-            >
-              <option value="all">All Accounts</option>
-              {accounts.map(acc => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Category</label>
-            <select
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
-            >
-              <option value="all">All Categories</option>
-              {categoriesList.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Type</label>
-            <select
-              value={selectedType}
-              onChange={e => setSelectedType(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
-            >
-              <option value="all">All Types</option>
-              <option value="expense">Expense Only</option>
-              <option value="income">Income Only</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <button
-            onClick={generateReport}
-            disabled={loading}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2"
-          >
-            <FaFilter /> {loading ? 'Generating...' : 'Generate Report'}
-          </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button variant="secondary" icon={FaFileCsv} onClick={handleExportCSV}>
+            Export CSV
+          </Button>
+          <Button variant="outline" icon={FaPrint} onClick={handlePrint}>
+            Print Report
+          </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm">
+        <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '10px', color: '#f87171', marginBottom: '20px', fontSize: '0.9rem' }}>
           {error}
         </div>
       )}
 
-      {/* Generated Report Summary Metrics */}
-      {reportData && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Total Income</span>
-              <span className="text-lg sm:text-xl font-bold text-emerald-400 mt-1 block">
-                {formatAmount(reportData.summary?.total_income || 0)}
-              </span>
-            </div>
+      {/* Filter Bar */}
+      <Card style={{ marginBottom: '32px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          alignItems: 'end'
+        }}>
+          <Select
+            label="Date Range Preset"
+            value={selectedPreset}
+            onChange={(e) => handlePresetSelect(e.target.value)}
+            options={DATE_PRESETS}
+          />
 
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Total Expenses</span>
-              <span className="text-lg sm:text-xl font-bold text-red-400 mt-1 block">
-                {formatAmount(reportData.summary?.total_expense || 0)}
-              </span>
-            </div>
+          <Input
+            label="From Date"
+            type="date"
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              setSelectedPreset('custom');
+            }}
+          />
 
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Net Cash Flow</span>
-              <span className={`text-lg sm:text-xl font-bold mt-1 block ${(reportData.summary?.net_cash_flow || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {formatAmount(reportData.summary?.net_cash_flow || 0)}
-              </span>
-            </div>
+          <Input
+            label="To Date"
+            type="date"
+            value={toDate}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              setSelectedPreset('custom');
+            }}
+          />
 
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Savings Rate</span>
-              <span className="text-lg sm:text-xl font-bold text-cyan-400 mt-1 block">
-                {reportData.summary?.savings_rate || 0}%
-              </span>
-            </div>
+          <Select
+            label="Filter Account"
+            value={selectedAccount}
+            onChange={(e) => setSelectedAccount(e.target.value)}
+            options={accountOptions}
+          />
 
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Transactions</span>
-              <span className="text-lg sm:text-xl font-bold text-white mt-1 block">
-                {reportData.summary?.transaction_count || 0}
-              </span>
-            </div>
+          <Select
+            label="Transaction Type"
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            options={TYPE_OPTIONS}
+          />
 
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-              <span className="text-xs text-slate-400 font-medium block">Avg Daily Spend</span>
-              <span className="text-lg sm:text-xl font-bold text-indigo-300 mt-1 block">
-                {formatAmount(reportData.summary?.avg_daily_spending || 0)}
-              </span>
-            </div>
-          </div>
-
-          {/* Breakdowns Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Category Expenses Breakdown */}
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <FaArrowDown className="text-red-400" /> Expenses by Category
-              </h3>
-              {Object.keys(reportData.breakdowns?.expense_by_category || {}).length === 0 ? (
-                <p className="text-xs text-slate-500 py-4">No category expense records in date range.</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(reportData.breakdowns.expense_by_category).map(([cat, amt]) => {
-                    const pct = reportData.summary.total_expense > 0 ? (amt / reportData.summary.total_expense * 100).toFixed(1) : 0;
-                    return (
-                      <div key={cat} className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-300">{cat}</span>
-                          <span className="text-white">{formatAmount(amt)} <span className="text-slate-400 font-normal">({pct}%)</span></span>
-                        </div>
-                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-red-500 h-full rounded-full" style={{ width: `${Math.min(100, pct)}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Income by Category Breakdown */}
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <FaArrowUp className="text-emerald-400" /> Income by Category
-              </h3>
-              {Object.keys(reportData.breakdowns?.income_by_category || {}).length === 0 ? (
-                <p className="text-xs text-slate-500 py-4">No income records in date range.</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(reportData.breakdowns.income_by_category).map(([cat, amt]) => {
-                    const pct = reportData.summary.total_income > 0 ? (amt / reportData.summary.total_income * 100).toFixed(1) : 0;
-                    return (
-                      <div key={cat} className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-300">{cat}</span>
-                          <span className="text-white">{formatAmount(amt)} <span className="text-slate-400 font-normal">({pct}%)</span></span>
-                        </div>
-                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(100, pct)}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Transactions List */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <h3 className="text-base font-bold text-white">Statement Transactions ({reportData.transactions?.length || 0})</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="text-slate-400 border-b border-slate-800">
-                    <th className="pb-3 font-semibold">Date</th>
-                    <th className="pb-3 font-semibold">Description</th>
-                    <th className="pb-3 font-semibold">Category</th>
-                    <th className="pb-3 font-semibold text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {reportData.transactions?.map(t => (
-                    <tr key={t.id} className="hover:bg-slate-800/40">
-                      <td className="py-3 text-slate-400 font-mono">{t.date ? t.date.split('T')[0] : '-'}</td>
-                      <td className="py-3 text-white font-medium">{t.description || t.category}</td>
-                      <td className="py-3 text-slate-400">{t.category}</td>
-                      <td className={`py-3 text-right font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div style={{ marginBottom: '12px' }}>
+            <Button
+              variant="primary"
+              fullWidth
+              loading={loading}
+              onClick={generateReport}
+              icon={FaFilter}
+            >
+              Generate Report
+            </Button>
           </div>
         </div>
-      )}
+      </Card>
+
+      {/* Summary Cards Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
+        <Card style={{ borderLeft: '4px solid #10b981' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
+            TOTAL INCOME
+          </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            {formatAmount(summary.total_income)}
+          </div>
+        </Card>
+
+        <Card style={{ borderLeft: '4px solid #ef4444' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f87171', textTransform: 'uppercase' }}>
+            TOTAL EXPENSES
+          </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            {formatAmount(summary.total_expenses)}
+          </div>
+        </Card>
+
+        <Card style={{ borderLeft: `4px solid ${summary.net_cash_flow >= 0 ? '#10b981' : '#ef4444'}` }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: summary.net_cash_flow >= 0 ? '#34d399' : '#f87171', textTransform: 'uppercase' }}>
+            NET CASH FLOW
+          </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            {formatAmount(summary.net_cash_flow)}
+          </div>
+        </Card>
+
+        <Card style={{ borderLeft: '4px solid #4f46e5' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase' }}>
+            SAVINGS RATE
+          </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            {summary.savings_rate || 0}%
+          </div>
+        </Card>
+
+        <Card style={{ borderLeft: '4px solid #38bdf8' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase' }}>
+            TRANSACTIONS
+          </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            {summary.transaction_count || 0}
+          </div>
+        </Card>
+      </div>
+
+      {/* Category Breakdown & Insights */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gap: '24px',
+        marginBottom: '32px'
+      }}>
+        <Card title="Category Spending Breakdown">
+          {categoriesBreakdown.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+              No category expense breakdown available for this range.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {categoriesBreakdown.map((cat, idx) => {
+                const percentage = summary.total_expenses > 0 ? Math.round((cat.amount / summary.total_expenses) * 100) : 0;
+                return (
+                  <div key={idx}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.88rem' }}>
+                      <span style={{ fontWeight: 600, color: '#f8fafc' }}>{cat.category}</span>
+                      <span style={{ color: '#cbd5e1', fontWeight: 700 }}>{formatAmount(cat.amount)} ({percentage}%)</span>
+                    </div>
+                    <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(percentage, 100)}%`, background: 'linear-gradient(90deg, #4f46e5, #9333ea)', borderRadius: '4px' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Transactions List / Cards */}
+      <Card title={`Detailed Transactions (${transactionsList.length})`}>
+        {transactionsList.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+            <FaReceipt size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
+            <div>No transactions recorded within the selected filters and date range.</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {transactionsList.map((tx) => (
+              <div
+                key={tx.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '12px',
+                  gap: '16px',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: tx.type === 'income' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                    color: tx.type === 'income' ? '#34d399' : '#f87171',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {tx.type === 'income' ? <FaArrowUp size={16} /> : <FaArrowDown size={16} />}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
+                      {tx.category || 'General'}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {tx.description || 'No description'} • {tx.account_name || 'Account'} • {tx.date}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    color: tx.type === 'income' ? '#34d399' : '#f87171'
+                  }}>
+                    {tx.type === 'income' ? '+' : '-'}{formatAmount(tx.amount)}
+                  </div>
+                  <Badge variant={tx.type === 'income' ? 'income' : 'expense'}>
+                    {tx.type}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
     </div>
   );
 };

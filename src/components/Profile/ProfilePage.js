@@ -1,145 +1,220 @@
 import React, { useState, useContext } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import * as api from '../../services/api';
-import Alert from '../common/Alert';
-import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import './ProfilePage.css';
+import { FaLock, FaCheckCircle, FaShieldAlt, FaKey } from 'react-icons/fa';
+import Card from '../ui/Card';
+import Input from '../ui/Input';
+import Button from '../ui/Button';
+import Badge from '../ui/Badge';
 
 const ProfilePage = () => {
   const { loggedInUser } = useContext(UserContext);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState({ type: '', content: '' });
-  const [showCurrentPasswordInput, setShowCurrentPasswordInput] = useState(false);
-  const [showNewPasswordInput, setShowNewPasswordInput] = useState(false);
-  const [showConfirmPasswordInput, setShowConfirmPasswordInput] = useState(false);
+  
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const calculatePasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: 'None', color: '#64748b' };
+    let score = 0;
+    if (pwd.length >= 6) score += 1;
+    if (pwd.length >= 10) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+    if (score <= 2) return { score: 25, label: 'Weak', color: '#ef4444' };
+    if (score <= 4) return { score: 70, label: 'Medium', color: '#f59e0b' };
+    return { score: 100, label: 'Strong', color: '#10b981' };
+  };
+
+  const strength = calculatePasswordStrength(newPassword);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage({ type: '', content: '' });
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (!currentPassword) {
+      setErrorMsg('Please enter your current password.');
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', content: 'New passwords do not match.' });
+      setErrorMsg('New passwords do not match.');
       return;
     }
 
     if (newPassword.length < 6) {
-      setMessage({ type: 'error', content: 'New password must be at least 6 characters long.' });
+      setErrorMsg('New password must be at least 6 characters long.');
       return;
     }
 
     try {
-      if (!loggedInUser) {
-        setMessage({ type: 'error', content: 'You must be logged in to change your password.' });
-        return;
-      }
-
+      setLoading(true);
       const res = await api.changePassword(currentPassword, newPassword);
-      setMessage({ type: 'success', content: res.message || 'Password changed successfully!' });
+      setSuccessMsg(res.message || 'Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      setMessage({ type: 'error', content: error.message || 'An error occurred while changing password.' });
+      setErrorMsg(error.message || 'Failed to update security password.');
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!loggedInUser) {
-    return <div className="glass-card"><p>Please log in to view your profile.</p></div>;
+    return (
+      <Card style={{ maxWidth: '500px', margin: '40px auto', textAlign: 'center' }}>
+        <p>Please log in to view your profile.</p>
+      </Card>
+    );
   }
 
   return (
-    <div className="profile-page-container">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
-        <FaUser color="var(--primary-glow)" size={24} />
-        <h2 style={{ margin: 0 }}>User Profile</h2>
-      </div>
-
-      {message.content && <Alert type={message.type} message={message.content} />}
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
       
-      <div className="profile-info">
-        <p><strong>Name:</strong> {loggedInUser.name}</p>
-        <p><strong>Email:</strong> {loggedInUser.email}</p>
-        <p><strong>Role:</strong> {loggedInUser.role || 'user'}</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-          <strong>Password:</strong> <span>••••••••</span>
-        </div>
+      {/* Header */}
+      <div style={{ marginBottom: '28px' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+          User Profile & Security
+        </h1>
+        <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+          Manage your personal identity credentials and application security settings.
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="password-change-form">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <FaLock color="var(--primary-glow)" />
-          <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Change Security Password</h3>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+        
+        {/* Account Information Card */}
+        <Card title="Account Details">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #4f46e5, #9333ea)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              fontSize: '1.6rem',
+              fontWeight: 800
+            }}>
+              {(loggedInUser.name || 'U')[0].toUpperCase()}
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc' }}>
+                {loggedInUser.name}
+              </h3>
+              <span style={{ fontSize: '0.88rem', color: '#94a3b8' }}>
+                {loggedInUser.email}
+              </span>
+              <div style={{ marginTop: '6px' }}>
+                <Badge variant={loggedInUser.role === 'admin' ? 'warning' : 'info'}>
+                  {loggedInUser.role ? loggedInUser.role.toUpperCase() : 'USER'}
+                </Badge>
+              </div>
+            </div>
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="currentPassword">Current Password:</label>
-          <div className="password-input-container">
-            <input
-              type={showCurrentPasswordInput ? "text" : "password"}
-              id="currentPassword"
-              className="glass-input"
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+              <span style={{ color: '#94a3b8' }}>Account Type:</span>
+              <span style={{ color: '#f8fafc', fontWeight: 600 }}>Standard FinAI Consumer</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+              <span style={{ color: '#94a3b8' }}>Email Status:</span>
+              <span style={{ color: '#34d399', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FaCheckCircle size={12} /> Verified
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+              <span style={{ color: '#94a3b8' }}>Security Level:</span>
+              <span style={{ color: '#818cf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FaShieldAlt size={12} /> JWT Encrypted
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Security / Password Change Card */}
+        <Card title="Change Security Password">
+          <form onSubmit={handleSubmit}>
+            {errorMsg && (
+              <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '8px', color: '#f87171', fontSize: '0.85rem', marginBottom: '16px' }}>
+                {errorMsg}
+              </div>
+            )}
+
+            {successMsg && (
+              <div style={{ padding: '10px 14px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '8px', color: '#34d399', fontSize: '0.85rem', marginBottom: '16px' }}>
+                {successMsg}
+              </div>
+            )}
+
+            <Input
+              label="Current Password"
+              type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Enter current password"
               required
+              icon={FaLock}
             />
-            <button
-              type="button"
-              onClick={() => setShowCurrentPasswordInput(!showCurrentPasswordInput)}
-              className="password-toggle-btn"
-            >
-              {showCurrentPasswordInput ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="newPassword">New Password:</label>
-          <div className="password-input-container">
-            <input
-              type={showNewPasswordInput ? "text" : "password"}
-              id="newPassword"
-              className="glass-input"
+            <Input
+              label="New Password"
+              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password (min 6 chars)"
               required
+              icon={FaKey}
             />
-            <button
-              type="button"
-              onClick={() => setShowNewPasswordInput(!showNewPasswordInput)}
-              className="password-toggle-btn"
-            >
-              {showNewPasswordInput ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm New Password:</label>
-          <div className="password-input-container">
-            <input
-              type={showConfirmPasswordInput ? "text" : "password"}
-              id="confirmPassword"
-              className="glass-input"
+            {/* Password Strength Indicator */}
+            {newPassword && (
+              <div style={{ marginBottom: '14px', marginTop: '-4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
+                  <span style={{ color: '#94a3b8' }}>Password Strength:</span>
+                  <span style={{ color: strength.color, fontWeight: 700 }}>{strength.label}</span>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${strength.score}%`, background: strength.color, transition: 'all 0.3s ease' }} />
+                </div>
+              </div>
+            )}
+
+            <Input
+              label="Confirm New Password"
+              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter new password"
               required
+              icon={FaKey}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPasswordInput(!showConfirmPasswordInput)}
-              className="password-toggle-btn"
-            >
-              {showConfirmPasswordInput ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-        </div>
 
-        <button type="submit" className="btn-gradient-primary" style={{ width: '100%', marginTop: '14px' }}>
-          Update Password
-        </button>
-      </form>
+            <div style={{ marginTop: '20px' }}>
+              <Button
+                variant="primary"
+                type="submit"
+                fullWidth
+                loading={loading}
+              >
+                Update Password
+              </Button>
+            </div>
+          </form>
+        </Card>
+
+      </div>
+
     </div>
   );
 };
