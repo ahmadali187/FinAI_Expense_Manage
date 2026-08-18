@@ -80,10 +80,10 @@ const ProfilePage = () => {
       
       {/* Header */}
       <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary, #f8fafc)' }}>
           User Profile & Security
         </h1>
-        <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+        <p style={{ margin: 0, color: 'var(--text-muted, #94a3b8)', fontSize: '0.95rem' }}>
           Manage your personal identity credentials and application security settings.
         </p>
       </div>

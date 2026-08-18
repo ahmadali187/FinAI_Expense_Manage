@@ -37,14 +37,14 @@ const SettingsPage = () => {
     return (
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justify: 'space-between',
         alignItems: 'center',
         padding: '14px 0',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
       }}>
         <div style={{ paddingRight: '16px' }}>
-          <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>{label}</div>
-          <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>{description}</div>
+          <div style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.95rem' }}>{label}</div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)', marginTop: '2px' }}>{description}</div>
         </div>
 
         <button
@@ -54,7 +54,7 @@ const SettingsPage = () => {
             width: '54px',
             height: '28px',
             borderRadius: '14px',
-            background: isEnabled ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255, 255, 255, 0.15)',
+            background: isEnabled ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(148, 163, 184, 0.3)',
             border: 'none',
             padding: '3px',
             cursor: 'pointer',
@@ -90,10 +90,10 @@ const SettingsPage = () => {
       
       {/* Header */}
       <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary, #f8fafc)' }}>
           Application Settings
         </h1>
-        <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+        <p style={{ margin: 0, color: 'var(--text-muted, #94a3b8)', fontSize: '0.95rem' }}>
           Configure custom categories, preferences, notifications, and application parameters.
         </p>
       </div>
@@ -139,8 +139,8 @@ const SettingsPage = () => {
             {/* Currency Selector */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>Default Currency</div>
-                <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Set primary display currency across all reports, cards, and AI metrics</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.95rem' }}>Default Currency</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)' }}>Set primary display currency across all reports, cards, and AI metrics</div>
               </div>
 
               <select
@@ -148,10 +148,10 @@ const SettingsPage = () => {
                 onChange={(e) => changeCurrency(e.target.value)}
                 style={{
                   padding: '8px 16px',
-                  background: 'rgba(15, 23, 42, 0.85)',
+                  background: 'var(--surface-glass, rgba(15, 23, 42, 0.85))',
                   border: '1px solid rgba(99, 102, 241, 0.4)',
                   borderRadius: '10px',
-                  color: '#818cf8',
+                  color: 'var(--text-primary, #818cf8)',
                   fontWeight: 800,
                   fontSize: '0.9rem',
                   outline: 'none',
@@ -169,8 +169,8 @@ const SettingsPage = () => {
             {/* Theme Selector */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>Theme Mode</div>
-                <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Switch interface visual styling between Dark, Light, or System preferences</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.95rem' }}>Theme Mode</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)' }}>Switch interface visual styling between Dark, Light, or System preferences</div>
               </div>
 
               <select
@@ -178,10 +178,10 @@ const SettingsPage = () => {
                 onChange={(e) => changeTheme(e.target.value)}
                 style={{
                   padding: '8px 16px',
-                  background: 'rgba(15, 23, 42, 0.85)',
+                  background: 'var(--surface-glass, rgba(15, 23, 42, 0.85))',
                   border: '1px solid rgba(52, 211, 153, 0.4)',
                   borderRadius: '10px',
-                  color: '#34d399',
+                  color: 'var(--text-primary, #34d399)',
                   fontWeight: 700,
                   fontSize: '0.9rem',
                   outline: 'none',

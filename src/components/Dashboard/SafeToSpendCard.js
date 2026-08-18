@@ -33,10 +33,10 @@ const SafeToSpendCard = ({ safeToSpendData }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
             <FaShieldAlt /> FinAI Safe-to-Spend Guidance
           </div>
-          <h2 style={{ margin: '8px 0 4px 0', fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>
-            {formatAmount(safe_to_spend_today)} <span style={{ fontSize: '1rem', fontWeight: 600, color: '#a7f3d0' }}>/ day</span>
+          <h2 style={{ margin: '8px 0 4px 0', fontSize: '2.4rem', fontWeight: 900, color: 'var(--text-primary, #ffffff)', lineHeight: 1 }}>
+            {formatAmount(safe_to_spend_today)} <span style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981' }}>/ day</span>
           </h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1' }}>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted, #cbd5e1)' }}>
             Estimated safe discretionary limit for the next <strong>{remaining_days} days</strong>.
           </p>
 
@@ -45,9 +45,9 @@ const SafeToSpendCard = ({ safeToSpendData }) => {
             style={{
               background: 'none',
               border: 'none',
-              color: '#60a5fa',
+              color: '#818cf8',
               fontSize: '0.8rem',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
               marginTop: '6px',
               padding: 0,
@@ -60,21 +60,21 @@ const SafeToSpendCard = ({ safeToSpendData }) => {
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: 'rgba(15, 23, 42, 0.6)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: 'var(--surface-glass, rgba(15, 23, 42, 0.6))', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))' }}>
           <div>
-            <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <FaReceipt size={10} color="#f59e0b" /> Bills
             </span>
-            <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>{formatAmount(upcoming_bills)}</strong>
+            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary, #f8fafc)' }}>{formatAmount(upcoming_bills)}</strong>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <FaPiggyBank size={10} color="#3b82f6" /> Savings
             </span>
-            <strong style={{ fontSize: '0.9rem', color: '#f8fafc' }}>{formatAmount(planned_savings)}</strong>
+            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary, #f8fafc)' }}>{formatAmount(planned_savings)}</strong>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <FaCalendarDay size={10} color="#10b981" /> Fund
             </span>
             <strong style={{ fontSize: '0.9rem', color: '#10b981' }}>{formatAmount(remaining_discretionary)}</strong>

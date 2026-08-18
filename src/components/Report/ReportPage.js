@@ -187,10 +187,10 @@ const ReportPage = () => {
         marginBottom: '28px'
       }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary, #f8fafc)' }}>
             Financial Reports
           </h1>
-          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>
+          <p style={{ margin: 0, color: 'var(--text-muted, #94a3b8)', fontSize: '0.95rem' }}>
             Understand where your money goes with cash flow metrics and detailed transaction breakdowns.
           </p>
         </div>

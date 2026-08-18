@@ -198,7 +198,7 @@ const Dashboard = () => {
               <FaArrowUp />
             </div>
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc' }}>{formatAmount(totalIncome)}</div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>{formatAmount(totalIncome)}</div>
         </div>
 
         <div className="glass-card" style={{ borderLeft: '4px solid #ef4444' }}>
@@ -208,7 +208,7 @@ const Dashboard = () => {
               <FaArrowDown />
             </div>
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f8fafc' }}>{formatAmount(totalExpenses)}</div>
+          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>{formatAmount(totalExpenses)}</div>
         </div>
 
         <div className="glass-card" style={{ borderLeft: '4px solid #6366f1' }}>

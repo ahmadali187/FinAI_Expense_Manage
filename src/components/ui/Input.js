@@ -55,14 +55,14 @@ const Input = ({
             padding: '10px 14px',
             paddingLeft: Icon ? '38px' : '14px',
             paddingRight: isPassword ? '40px' : '14px',
-            background: 'rgba(15, 23, 42, 0.6)',
-            border: error ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.12)',
+            background: 'var(--surface-glass, rgba(15, 23, 42, 0.6))',
+            border: error ? '1px solid #ef4444' : '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.12))',
             borderRadius: '8px',
             color: 'var(--text-primary, #f8fafc)',
             fontSize: '0.9rem',
             fontFamily: 'inherit',
             outline: 'none',
-            transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+            transition: 'all 0.2s ease',
           }}
           {...props}
         />

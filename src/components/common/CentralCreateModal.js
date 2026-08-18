@@ -27,32 +27,88 @@ const CentralCreateModal = ({ isOpen, onClose, onTransactionAdded }) => {
           onTransactionAdded={onTransactionAdded}
         />
       ) : (
-        <ModalPortal isOpen={isOpen} onClose={onClose} title="Add Transaction" maxWidth="440px">
-          <div className="text-center mb-6">
-            <p className="text-sm text-slate-400">What record type would you like to add?</p>
+        <ModalPortal isOpen={isOpen} onClose={onClose} title="Add Transaction" maxWidth="460px">
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <p style={{ margin: 0, color: 'var(--text-muted, #94a3b8)', fontSize: '0.9rem' }}>
+              What record type would you like to add?
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <button
+              type="button"
               onClick={() => handleSelectType('expense')}
-              className="flex flex-col items-center justify-center p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-2xl transition group cursor-pointer shadow-lg"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px 16px',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              <div className="w-14 h-14 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                <FiMinusCircle className="w-7 h-7" />
+              <div style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                background: 'rgba(239, 68, 68, 0.2)',
+                color: '#f87171',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px'
+              }}>
+                <FiMinusCircle style={{ width: '28px', height: '28px' }} />
               </div>
-              <span className="font-bold text-red-400 text-base mb-1">+ Add Expense</span>
-              <span className="text-xs text-slate-400">Outflow record</span>
+              <span style={{ fontWeight: 800, color: '#f87171', fontSize: '1rem', marginBottom: '4px', display: 'block' }}>
+                + Add Expense
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'block' }}>
+                Outflow record
+              </span>
             </button>
 
             <button
+              type="button"
               onClick={() => handleSelectType('income')}
-              className="flex flex-col items-center justify-center p-6 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 rounded-2xl transition group cursor-pointer shadow-lg"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px 16px',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                <FiPlusCircle className="w-7 h-7" />
+              <div style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                background: 'rgba(16, 185, 129, 0.2)',
+                color: '#34d399',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px'
+              }}>
+                <FiPlusCircle style={{ width: '28px', height: '28px' }} />
               </div>
-              <span className="font-bold text-emerald-400 text-base mb-1">+ Add Income</span>
-              <span className="text-xs text-slate-400">Inflow record</span>
+              <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem', marginBottom: '4px', display: 'block' }}>
+                + Add Income
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'block' }}>
+                Inflow record
+              </span>
             </button>
           </div>
         </ModalPortal>

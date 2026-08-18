@@ -101,115 +101,221 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
 
   return (
     <ModalPortal isOpen={isOpen} onClose={onClose} title="FinAI Financial Assistant" maxWidth="560px">
-      <div className="space-y-4">
-        {/* Messages List */}
-        <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        
+        {/* Messages Scroll Area */}
+        <div style={{
+          maxHeight: '360px',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          paddingRight: '4px'
+        }}>
           {messages.map((m, idx) => (
             <div
               key={idx}
-              className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed max-w-[88%] ${
-                m.sender === 'user'
-                  ? 'bg-indigo-600 text-white ml-auto rounded-br-xs shadow-md'
-                  : 'bg-slate-800/90 border border-slate-700/70 text-slate-200 mr-auto rounded-bl-xs shadow-md'
-              }`}
+              style={{
+                display: 'flex',
+                justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start'
+              }}
             >
-              <div className="whitespace-pre-line">{m.text}</div>
+              <div
+                style={{
+                  maxWidth: '85%',
+                  padding: '12px 16px',
+                  borderRadius: m.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  background: m.sender === 'user' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(30, 41, 59, 0.85)',
+                  border: m.sender === 'user' ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff',
+                  fontSize: '0.88rem',
+                  lineHeight: 1.5,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                }}
+              >
+                <div style={{ whiteSpace: 'pre-line' }}>{m.text}</div>
 
-              {/* Source/Calculation Breakdown Toggle */}
-              {(m.breakdown || m.classification === 'CALCULATION' || m.classification === 'RECOMMENDATION') && m.sender === 'ai' && (
-                <div className="mt-2 pt-2 border-t border-slate-700/50">
-                  <button
-                    onClick={() => setShowBreakdownIdx(showBreakdownIdx === idx ? null : idx)}
-                    className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition"
-                  >
-                    <FaCalculator className="text-xs" /> {showBreakdownIdx === idx ? 'Hide breakdown' : 'View calculation details'}
-                  </button>
-                  {showBreakdownIdx === idx && (
-                    <div className="mt-2 bg-slate-900/90 p-3 rounded-xl border border-indigo-500/30 text-xs space-y-1.5 text-slate-300">
-                      <div><strong className="text-white">Type:</strong> {m.classification}</div>
-                      {m.breakdown && (
-                        <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
-                          <div>Balance: ₹{m.breakdown.current_balance?.toLocaleString('en-IN')}</div>
-                          <div>Commitments: ₹{m.breakdown.upcoming_commitments?.toLocaleString('en-IN')}</div>
-                          <div>Available: ₹{m.breakdown.estimated_available_amount?.toLocaleString('en-IN')}</div>
-                          <div>Purchase: ₹{m.breakdown.purchase_amount?.toLocaleString('en-IN')}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Contextual Action Buttons */}
-              {m.actions && m.actions.length > 0 && m.sender === 'ai' && (
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                  {m.actions.map((act, aIdx) => (
+                {/* Calculation Breakdown */}
+                {(m.breakdown || m.classification === 'CALCULATION' || m.classification === 'RECOMMENDATION') && m.sender === 'ai' && (
+                  <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
                     <button
-                      key={aIdx}
-                      onClick={() => handleActionClick(act)}
-                      className="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 rounded-lg text-xs font-medium transition"
+                      type="button"
+                      onClick={() => setShowBreakdownIdx(showBreakdownIdx === idx ? null : idx)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#818cf8',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: 0
+                      }}
                     >
-                      {act.label} →
+                      <FaCalculator /> {showBreakdownIdx === idx ? 'Hide breakdown' : 'View calculation details'}
                     </button>
-                  ))}
-                </div>
-              )}
+                    {showBreakdownIdx === idx && (
+                      <div style={{
+                        marginTop: '8px',
+                        background: 'rgba(15, 23, 42, 0.9)',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                        fontSize: '0.75rem',
+                        color: '#cbd5e1'
+                      }}>
+                        <div><strong style={{ color: '#ffffff' }}>Type:</strong> {m.classification}</div>
+                        {m.breakdown && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
+                            <div>Balance: ₹{m.breakdown.current_balance?.toLocaleString('en-IN')}</div>
+                            <div>Commitments: ₹{m.breakdown.upcoming_commitments?.toLocaleString('en-IN')}</div>
+                            <div>Available: ₹{m.breakdown.estimated_available_amount?.toLocaleString('en-IN')}</div>
+                            <div>Purchase: ₹{m.breakdown.purchase_amount?.toLocaleString('en-IN')}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {/* AI Proposed Action Card */}
-              {m.proposal && !m.proposalConfirmed && (
-                <div className="mt-3 p-3 bg-slate-900/90 border border-emerald-500/40 rounded-xl space-y-2">
-                  <div className="text-xs font-bold text-emerald-400">AI Proposed Action</div>
-                  <button
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5"
-                    onClick={() => handleConfirmProposal(m.proposal, idx)}
-                    disabled={loading}
-                  >
-                    <FaCheck /> Confirm & Execute
-                  </button>
-                </div>
-              )}
-              {m.proposalConfirmed && (
-                <div className="mt-2 text-xs font-bold text-emerald-400 flex items-center gap-1">
-                  ✓ Executed successfully in database
-                </div>
-              )}
+                {/* Contextual Actions */}
+                {m.actions && m.actions.length > 0 && m.sender === 'ai' && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                    {m.actions.map((act, aIdx) => (
+                      <button
+                        key={aIdx}
+                        onClick={() => handleActionClick(act)}
+                        style={{
+                          background: 'rgba(99, 102, 241, 0.2)',
+                          border: '1px solid rgba(99, 102, 241, 0.4)',
+                          color: '#c7d2fe',
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {act.label} →
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Proposal Action Card */}
+                {m.proposal && !m.proposalConfirmed && (
+                  <div style={{
+                    marginTop: '10px',
+                    padding: '10px',
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    borderRadius: '10px'
+                  }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#34d399', marginBottom: '6px' }}>
+                      AI Proposed Action
+                    </div>
+                    <button
+                      onClick={() => handleConfirmProposal(m.proposal, idx)}
+                      disabled={loading}
+                      style={{
+                        padding: '6px 14px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <FaCheck /> Confirm & Execute
+                    </button>
+                  </div>
+                )}
+                {m.proposalConfirmed && (
+                  <div style={{ marginTop: '6px', fontSize: '0.75rem', fontWeight: 700, color: '#34d399' }}>
+                    ✓ Executed successfully in database
+                  </div>
+                )}
+              </div>
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Dynamic Quick Prompt Chips */}
-        <div className="flex flex-wrap gap-1.5 py-1">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '4px 0' }}>
           {quickPrompts.map((prompt, i) => (
             <button
               key={i}
               onClick={() => handleSend(prompt)}
               disabled={loading}
-              className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-200 text-xs rounded-xl transition flex items-center gap-1.5"
+              style={{
+                padding: '6px 12px',
+                background: 'rgba(99, 102, 241, 0.15)',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
+                color: '#c7d2fe',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                borderRadius: '9999px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease'
+              }}
             >
-              <FaLightbulb className="text-amber-400 text-xs" /> {prompt}
+              <FaLightbulb color="#fbbf24" size={12} /> {prompt}
             </button>
           ))}
         </div>
 
         {/* Input Form */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2 pt-1">
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
           <input
             type="text"
-            className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
             placeholder="Ask FinAI about your cashflow, budgets..."
             value={input}
             onChange={e => setInput(e.target.value)}
             disabled={loading}
+            style={{
+              flex: 1,
+              padding: '10px 14px',
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '10px',
+              color: '#ffffff',
+              fontSize: '0.85rem',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center"
+            style={{
+              padding: '10px 16px',
+              background: loading || !input.trim() ? 'rgba(99, 102, 241, 0.4)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              color: '#ffffff',
+              fontWeight: 700,
+              border: 'none',
+              borderRadius: '10px',
+              cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+            }}
           >
-            <FaPaperPlane className="text-sm" />
+            <FaPaperPlane size={14} />
           </button>
         </form>
+
       </div>
     </ModalPortal>
   );

@@ -5,13 +5,15 @@ const Card = ({ children, title, subtitle, action, className = '', style = {}, h
     <div
       className={`custom-card ${className}`}
       style={{
-        background: 'rgba(30, 41, 59, 0.6)',
+        background: 'var(--surface-glass, rgba(30, 41, 59, 0.65))',
         backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))',
         borderRadius: '16px',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+        boxShadow: 'var(--shadow-glass, 0 8px 24px rgba(0, 0, 0, 0.2))',
         overflow: 'hidden',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        color: 'var(--text-primary, #f8fafc)',
         ...style,
       }}
     >
@@ -19,7 +21,7 @@ const Card = ({ children, title, subtitle, action, className = '', style = {}, h
         <div
           style={{
             padding: '18px 22px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            borderBottom: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -29,12 +31,12 @@ const Card = ({ children, title, subtitle, action, className = '', style = {}, h
         >
           <div>
             {title && (
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)' }}>
                 {subtitle}
               </p>
             )}
