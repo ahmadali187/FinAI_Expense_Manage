@@ -97,8 +97,9 @@ a {
 @media (max-width: 992px) {
   .content-with-sidebar {
     margin-left: 0;
-    padding: 15px;
-    padding-bottom: 90px;
+    padding: 16px;
+    padding-top: 68px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 12px));
   }
 }
 

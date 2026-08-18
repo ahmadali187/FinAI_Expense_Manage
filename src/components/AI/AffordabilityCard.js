@@ -36,74 +36,117 @@ const AffordabilityCard = () => {
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-      <div className="flex items-center gap-2">
-        <FaCalculator className="text-indigo-400 text-lg" />
-        <h3 className="text-base font-bold text-white">Can I Afford This Purchase?</h3>
+    <div style={{
+      background: 'rgba(30, 41, 59, 0.65)',
+      backdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      borderRadius: '16px',
+      padding: '20px',
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+        <FaCalculator color="#818cf8" size={20} />
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          Can I Afford This Purchase?
+        </h3>
       </div>
 
-      <form onSubmit={handleEvaluate} className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+      <form onSubmit={handleEvaluate} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+          <span style={{
+            position: 'absolute',
+            left: '14px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#94a3b8',
+            fontWeight: 800,
+            fontSize: '0.9rem'
+          }}>
+            ₹
+          </span>
           <input
             type="number"
             step="0.01"
             placeholder="Enter purchase amount..."
             value={amount}
             onChange={e => setAmount(e.target.value)}
-            className="w-full pl-7 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+            style={{
+              width: '100%',
+              paddingLeft: '32px',
+              paddingRight: '12px',
+              paddingTop: '10px',
+              paddingBottom: '10px',
+              background: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '10px',
+              color: '#ffffff',
+              fontSize: '0.9rem',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
         </div>
         <button
           type="submit"
           disabled={loading || !amount}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap"
+          style={{
+            padding: '10px 18px',
+            background: loading || !amount ? 'rgba(99, 102, 241, 0.4)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: loading || !amount ? 'not-allowed' : 'pointer',
+            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+            whiteSpace: 'nowrap'
+          }}
         >
           {loading ? 'Evaluating...' : 'Check Affordability'}
         </button>
       </form>
 
       {result && (
-        <div className="pt-2 border-t border-slate-800 space-y-3 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Affordability Rating</span>
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>Affordability Rating</span>
             {result.result === 'SAFE' && (
-              <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-full text-xs font-bold flex items-center gap-1.5">
+              <span style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#34d399', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FaCheckCircle /> SAFE TO BUY
               </span>
             )}
             {result.result === 'CAUTION' && (
-              <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-full text-xs font-bold flex items-center gap-1.5">
+              <span style={{ background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FaExclamationTriangle /> CAUTION ADVISED
               </span>
             )}
             {result.result === 'NOT RECOMMENDED' && (
-              <span className="px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-300 rounded-full text-xs font-bold flex items-center gap-1.5">
+              <span style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FaTimesCircle /> NOT RECOMMENDED
               </span>
             )}
           </div>
 
-          <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-xs space-y-2 font-mono">
-            <div className="flex justify-between text-slate-300">
+          <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1' }}>
               <span>Current Account Balance</span>
-              <span className="text-white">{formatAmount(result.current_balance || 0)}</span>
+              <span style={{ color: '#ffffff', fontWeight: 700 }}>{formatAmount(result.current_balance || 0)}</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
               <span>Upcoming Bills / Commitments</span>
-              <span className="text-red-400">-{formatAmount(result.upcoming_commitments || 0)}</span>
+              <span style={{ color: '#f87171', fontWeight: 700 }}>-{formatAmount(result.upcoming_commitments || 0)}</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
               <span>Savings Targets Buffer</span>
-              <span className="text-amber-400">-{formatAmount(result.savings_commitments || 0)}</span>
+              <span style={{ color: '#fbbf24', fontWeight: 700 }}>-{formatAmount(result.savings_commitments || 0)}</span>
             </div>
-            <div className="flex justify-between border-t border-slate-800 pt-2 font-bold text-slate-200">
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '8px', fontWeight: 700, color: '#f8fafc' }}>
               <span>Available Discretionary</span>
-              <span className="text-indigo-300">{formatAmount(result.estimated_available_amount || 0)}</span>
+              <span style={{ color: '#818cf8' }}>{formatAmount(result.estimated_available_amount || 0)}</span>
             </div>
-            <div className="flex justify-between font-bold text-white pt-1 text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#ffffff', paddingTop: '4px', fontSize: '0.9rem' }}>
               <span>Purchase Amount</span>
-              <span className="text-white">{formatAmount(result.purchase_amount || 0)}</span>
+              <span style={{ color: '#ffffff' }}>{formatAmount(result.purchase_amount || 0)}</span>
             </div>
           </div>
         </div>
