@@ -208,8 +208,15 @@ const BudgetManager = () => {
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '32px 16px', background: 'rgba(15, 23, 42, 0.3)', borderRadius: '12px', border: '1px dashed rgba(255, 255, 255, 0.1)' }}>
-          <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem', fontWeight: 500 }}>No spending limits set yet.</p>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginTop: '4px' }}>Click "+ Add Budget" above to set category caps.</span>
+          <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem', fontWeight: 600 }}>No budgets configured yet.</p>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginTop: '4px', marginBottom: '12px' }}>Set monthly spending limits for categories like Food or Transport to prevent overspending.</span>
+          <button
+            className="btn-gradient-primary"
+            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            onClick={() => setShowAddBudgetModal(true)}
+          >
+            + Create Budget
+          </button>
         </div>
       )}
     </div>

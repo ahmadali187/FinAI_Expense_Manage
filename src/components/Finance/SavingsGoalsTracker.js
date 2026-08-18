@@ -143,8 +143,12 @@ const SavingsGoalsTracker = () => {
           })}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '20px', color: '#cbd5e1', fontSize: '0.85rem' }}>
-          No savings goals created yet. Click "+ New Goal" above.
+        <div style={{ textAlign: 'center', padding: '24px 16px', background: 'rgba(15, 23, 42, 0.3)', borderRadius: '12px', border: '1px dashed rgba(255, 255, 255, 0.1)' }}>
+          <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem', fontWeight: 600 }}>No savings goals created yet.</p>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginTop: '4px', marginBottom: '12px' }}>Track progress toward a vacation, emergency fund, or major purchase.</span>
+          <button className="btn-gradient-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }} onClick={() => setShowAdd(true)}>
+            + Create Goal
+          </button>
         </div>
       )}
     </div>

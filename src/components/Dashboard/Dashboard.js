@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { BudgetsContext } from '../../contexts/BudgetsContext';
-import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { CurrencyContext } from '../../contexts/CurrencyContext';
 import * as api from '../../services/api';
 
@@ -21,6 +20,7 @@ import QuickAddExpenseModal from '../AI/QuickAddExpenseModal';
 import CsvImportModal from '../Finance/CsvImportModal';
 import NotificationCenter from '../Notifications/NotificationCenter';
 import AffordabilityCard from '../AI/AffordabilityCard';
+import AddTransactionModal from './AddTransactionModal';
 
 import { analyzeSpendingAnomalies } from '../../utils/aiEngine';
 import { exportTransactionsToCSV, generatePDFStatement } from '../../utils/exportService';
@@ -36,9 +36,8 @@ const EditTransactionModal = lazy(() => import('./EditTransactionModal'));
 
 const Dashboard = () => {
   const { loggedInUser } = useContext(UserContext);
-  const { transactions, deleteTransaction: deleteTransFromContext, addTransaction, refreshTransactions } = useContext(TransactionsContext);
+  const { transactions, deleteTransaction: deleteTransFromContext, refreshTransactions } = useContext(TransactionsContext);
   const { budgets } = useContext(BudgetsContext);
-  const { categories } = useContext(CategoriesContext);
   const { formatAmount } = useContext(CurrencyContext);
   const navigate = useNavigate();
 
@@ -56,13 +55,6 @@ const Dashboard = () => {
   const [budgetAlerts, setBudgetAlerts] = useState([]);
   const [aiAnomalies, setAiAnomalies] = useState([]);
 
-  // Form states for Add Transaction
-  const [txType, setTxType] = useState('expense');
-  const [txCategory, setTxCategory] = useState('');
-  const [txAmount, setTxAmount] = useState('');
-  const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]);
-  const [txDescription, setTxDescription] = useState('');
-  const [addTxError, setAddTxError] = useState('');
 
   const fetchBackendDashboard = useCallback(async () => {
     try {
@@ -127,38 +119,7 @@ const Dashboard = () => {
 
   const netBalance = totalIncome - totalExpenses;
 
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    setAddTxError('');
-    if (!txCategory || !txAmount || !txDate) {
-      setAddTxError('Please fill required fields.');
-      return;
-    }
-    if (isNaN(parseFloat(txAmount)) || parseFloat(txAmount) <= 0) {
-      setAddTxError('Please enter a valid positive amount.');
-      return;
-    }
-
-    await addTransaction({
-      type: txType,
-      category: txCategory,
-      amount: parseFloat(txAmount),
-      date: txDate,
-      description: txDescription
-    });
-
-    setShowAddModal(false);
-    setTxCategory('');
-    setTxAmount('');
-    setTxDescription('');
-    fetchBackendDashboard();
-  };
-
-  const handleReceiptScanned = (scannedData) => {
-    if (scannedData.amount) setTxAmount(scannedData.amount);
-    if (scannedData.category) setTxCategory(scannedData.category);
-    if (scannedData.description) setTxDescription(scannedData.description);
-    if (scannedData.date) setTxDate(scannedData.date);
+  const handleReceiptScanned = () => {
     setShowReceiptScanner(false);
     setShowAddModal(true);
   };
@@ -355,97 +316,28 @@ const Dashboard = () => {
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '36px 16px', background: 'rgba(15, 23, 42, 0.3)', borderRadius: '12px', border: '1px dashed rgba(255, 255, 255, 0.1)' }}>
-            <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem' }}>No financial transactions logged yet.</p>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginTop: '4px' }}>Click "+ Add Expense" or "⚡ Load Demo Data" above to get started.</span>
+            <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.95rem', fontWeight: 600 }}>No financial transactions logged yet.</p>
+            <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginTop: '4px', marginBottom: '16px' }}>Start tracking your money by adding an expense or income record.</span>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button className="btn-gradient-primary" style={{ fontSize: '0.85rem' }} onClick={() => setShowAddModal(true)}>
+                + Add Transaction
+              </button>
+            </div>
           </div>
         )}
       </div>
 
       {/* Add Transaction Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)} style={{ zIndex: 2000 }}>
-          <div className="modal-glass-container" style={{ maxWidth: '440px', background: '#0f172a', border: '1px solid rgba(255,255,255,0.2)', padding: '24px', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 16px 0', color: '#ffffff', fontSize: '1.2rem', fontWeight: 800 }}>Add Transaction</h3>
-            {addTxError && <Alert type="error" message={addTxError} />}
+      <AddTransactionModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        initialType="expense"
+        onTransactionAdded={() => {
+          refreshTransactions();
+          fetchBackendDashboard();
+        }}
+      />
 
-            <form onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  type="button"
-                  style={{ flex: 1, padding: '8px', borderRadius: '8px', border: 'none', background: txType === 'expense' ? '#ef4444' : 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700 }}
-                  onClick={() => setTxType('expense')}
-                >
-                  Expense
-                </button>
-                <button
-                  type="button"
-                  style={{ flex: 1, padding: '8px', borderRadius: '8px', border: 'none', background: txType === 'income' ? '#10b981' : 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700 }}
-                  onClick={() => setTxType('income')}
-                >
-                  Income
-                </button>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Category</label>
-                <select
-                  className="glass-input"
-                  style={{ background: '#1e293b', color: '#ffffff' }}
-                  value={txCategory}
-                  onChange={e => setTxCategory(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>Select category</option>
-                  {(categories[txType] || []).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Amount (₹)</label>
-                <input
-                  type="number"
-                  className="glass-input"
-                  style={{ background: '#1e293b', color: '#ffffff' }}
-                  value={txAmount}
-                  onChange={e => setTxAmount(e.target.value)}
-                  placeholder="e.g. 1500"
-                  required
-                  step="0.01"
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Date</label>
-                <input
-                  type="date"
-                  className="glass-input"
-                  style={{ background: '#1e293b', color: '#ffffff' }}
-                  value={txDate}
-                  onChange={e => setTxDate(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Description</label>
-                <input
-                  type="text"
-                  className="glass-input"
-                  style={{ background: '#1e293b', color: '#ffffff' }}
-                  value={txDescription}
-                  onChange={e => setTxDescription(e.target.value)}
-                  placeholder="Optional details..."
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '12px' }}>
-                <button type="button" className="btn-glass-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button type="submit" className="btn-gradient-primary">Save Transaction</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Quick Add Modal */}
       <QuickAddExpenseModal
