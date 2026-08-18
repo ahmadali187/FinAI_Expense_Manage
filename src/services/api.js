@@ -54,6 +54,7 @@ export const googleAuthUser = (googleProfile) => apiRequest('/auth/google', 'POS
 export const guestAuthUser = () => apiRequest('/auth/guest', 'POST');
 export const getCurrentUser = () => apiRequest('/auth/me');
 export const changePassword = (current_password, new_password) => apiRequest('/auth/change-password', 'POST', { current_password, new_password });
+export const deleteUserAccount = () => apiRequest('/user/account', 'DELETE');
 
 // --- Accounts / Wallets ---
 export const getAccounts = (includeArchived = false) => apiRequest(`/accounts${includeArchived ? '?include_archived=true' : ''}`);

@@ -215,6 +215,63 @@ const ProfilePage = () => {
 
       </div>
 
+      {/* Data Export & Danger Zone */}
+      <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+        {/* Data Export */}
+        <Card title="Data Backup & Export">
+          <p style={{ fontSize: '0.88rem', color: '#cbd5e1', marginBottom: '16px' }}>
+            Download a full archive of your transactions, accounts, categories, and goals in standard CSV or JSON format. Excludes security keys and credentials.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  const txs = await api.getTransactions();
+                  const accs = await api.getAccounts();
+                  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions: txs, accounts: accs }, null, 2));
+                  const dlAnchor = document.createElement('a');
+                  dlAnchor.setAttribute("href", dataStr);
+                  dlAnchor.setAttribute("download", `FinAI_Data_Backup_${new Date().toISOString().split('T')[0]}.json`);
+                  document.body.appendChild(dlAnchor);
+                  dlAnchor.click();
+                  dlAnchor.remove();
+                } catch (err) {
+                  console.error("Export JSON failed:", err);
+                }
+              }}
+            >
+              Export JSON Backup
+            </Button>
+          </div>
+        </Card>
+
+        {/* Danger Zone */}
+        <Card title="Danger Zone">
+          <p style={{ fontSize: '0.88rem', color: '#f87171', marginBottom: '16px' }}>
+            Permanently delete your user account and purge all linked financial transactions, accounts, and settings. This operation is irreversible.
+          </p>
+          <Button
+            variant="outline"
+            style={{ borderColor: '#ef4444', color: '#ef4444' }}
+            onClick={async () => {
+              const confirmText = prompt('Type DELETE to permanently erase your account and all financial data:');
+              if (confirmText === 'DELETE') {
+                try {
+                  await api.deleteUserAccount();
+                  localStorage.clear();
+                  window.location.href = '/login';
+                } catch (err) {
+                  alert(err.message || 'Failed to delete account.');
+                }
+              }
+            }}
+          >
+            Permanently Delete Account
+          </Button>
+        </Card>
+      </div>
+
     </div>
   );
 };

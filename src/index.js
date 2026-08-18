@@ -12,7 +12,13 @@ root.render(
 
 // Barba.js initialization will be moved to App.js
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((reg) => console.log('FinAI PWA Service Worker registered:', reg.scope))
+      .catch((err) => console.warn('FinAI Service Worker registration failed:', err));
+  });
+}
+
 reportWebVitals();

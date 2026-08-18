@@ -4,6 +4,7 @@ import { TransactionsProvider } from './contexts/TransactionsContext';
 import { BudgetsProvider } from './contexts/BudgetsContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -24,6 +25,7 @@ import AccountsPage from './components/Finance/AccountsPage';
 import SettingsPage from './components/Settings/SettingsPage';
 import ProfilePage from './components/Profile/ProfilePage';
 import ReportPage from './components/Report/ReportPage';
+import FinAiPage from './components/AI/FinAiPage';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
 import { SocketProvider } from './contexts/SocketContext';
@@ -69,9 +71,11 @@ function App() {
             <BudgetsProvider>
               <CategoriesProvider>
                 <CurrencyProvider>
-                  <Router>
-                    <AppContent />
-                  </Router>
+                  <ThemeProvider>
+                    <Router>
+                      <AppContent />
+                    </Router>
+                  </ThemeProvider>
                 </CurrencyProvider>
               </CategoriesProvider>
             </BudgetsProvider>
@@ -121,7 +125,7 @@ const AppContent = () => {
                 <Route path="/settings" element={<motion.div key="settings" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><SettingsPage /></motion.div>} />
                 <Route path="/profile" element={<motion.div key="profile" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ProfilePage /></motion.div>} />
                 <Route path="/report" element={<motion.div key="report" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><ReportPage /></motion.div>} />
-                <Route path="/finai" element={<motion.div key="finai" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><Dashboard /></motion.div>} />
+                <Route path="/finai" element={<motion.div key="finai" initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}><FinAiPage /></motion.div>} />
               </Route>
             </Route>
 

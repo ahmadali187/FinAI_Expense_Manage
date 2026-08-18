@@ -1879,6 +1879,27 @@ def admin_trigger_backup(current_user):
     log_activity(current_user.id, "Admin executed Database Backup")
     return jsonify({'success': True, 'backup_path': os.path.basename(backup_path)})
 
+@app.route('/api/user/account', methods=['DELETE'])
+@token_required
+def delete_user_account(current_user):
+    user_id = current_user.id
+    try:
+        Transaction.query.filter_by(user_id=user_id).delete()
+        Account.query.filter_by(user_id=user_id).delete()
+        Budget.query.filter_by(user_id=user_id).delete()
+        Subscription.query.filter_by(user_id=user_id).delete()
+        SavingsGoal.query.filter_by(user_id=user_id).delete()
+        Asset.query.filter_by(user_id=user_id).delete()
+        Liability.query.filter_by(user_id=user_id).delete()
+        Notification.query.filter_by(user_id=user_id).delete()
+        ActivityLog.query.filter_by(user_id=user_id).delete()
+        db.session.delete(current_user)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Account and all associated financial data deleted permanently.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Failed to delete account: {str(e)}'}), 500
+
 if __name__ == '__main__':
     is_debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     socketio.run(app, port=5000, debug=is_debug, allow_unsafe_werkzeug=True)

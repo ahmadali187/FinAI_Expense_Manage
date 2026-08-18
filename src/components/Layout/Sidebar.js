@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { FaChartLine, FaChartPie, FaCog, FaUser, FaSignOutAlt, FaRobot, FaSearch, FaWallet, FaUserShield } from 'react-icons/fa';
@@ -20,6 +20,18 @@ const Sidebar = ({ isOpen, onClose, onOpenCmdPalette, onOpenAi }) => {
   };
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    if (isOpen) {
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape' && onClose) {
+          onClose();
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
