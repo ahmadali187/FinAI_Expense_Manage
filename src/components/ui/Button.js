@@ -19,9 +19,9 @@ const Button = ({
     switch (variant) {
       case 'secondary':
         return {
-          background: 'rgba(30, 41, 59, 0.8)',
+          background: 'var(--surface-glass-hover, rgba(30, 41, 59, 0.8))',
           color: 'var(--text-primary, #f8fafc)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.15))',
         };
       case 'danger':
         return {

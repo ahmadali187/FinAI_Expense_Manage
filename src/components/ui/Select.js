@@ -31,8 +31,8 @@ const Select = ({
         style={{
           width: '100%',
           padding: '10px 14px',
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: error ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'var(--input-bg, rgba(15, 23, 42, 0.8))',
+          border: error ? '1px solid #ef4444' : '1px solid var(--input-border, rgba(255, 255, 255, 0.12))',
           borderRadius: '8px',
           color: 'var(--text-primary, #f8fafc)',
           fontSize: '0.9rem',
@@ -48,7 +48,7 @@ const Select = ({
           const val = typeof opt === 'object' ? opt.value : opt;
           const lbl = typeof opt === 'object' ? opt.label : opt;
           return (
-            <option key={val} value={val} style={{ background: '#0f172a', color: '#f8fafc' }}>
+            <option key={val} value={val}>
               {lbl}
             </option>
           );

@@ -71,7 +71,7 @@ const Modal = ({
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
+          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>
             {title}
           </h3>
           <button

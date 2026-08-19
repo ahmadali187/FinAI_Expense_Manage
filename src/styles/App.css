@@ -16,7 +16,14 @@
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
+  --text-disabled: #64748b;
+  --text-inverse: #0f172a;
   
+  --accent: #818cf8;
+  --success-text: #10b981;
+  --danger-text: #ef4444;
+  --warning-text: #f59e0b;
+
   --primary-glow: #6366f1;
   --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   --secondary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
@@ -38,15 +45,22 @@
 [data-theme='light'] {
   --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
   --bg-dark: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.94);
+  --surface-glass: rgba(241, 245, 249, 0.9);
   --surface-glass-hover: rgba(255, 255, 255, 1);
   --surface-glass-border: rgba(15, 23, 42, 0.12);
   --surface-glass-glow: rgba(99, 102, 241, 0.08);
+
   --text-primary: #0f172a;
   --text-secondary: #334155;
   --text-muted: #64748b;
   --text-disabled: #94a3b8;
   --text-inverse: #ffffff;
+
+  --accent: #4f46e5;
+  --success-text: #047857;
+  --danger-text: #b91c1c;
+  --warning-text: #b45309;
+
   --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
@@ -58,7 +72,7 @@
 [data-theme='light'] .glass-card,
 [data-theme='light'] .custom-card,
 [data-theme='light'] div[class*="Card"] {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
   color: #0f172a !important;
   border-color: rgba(15, 23, 42, 0.12) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;

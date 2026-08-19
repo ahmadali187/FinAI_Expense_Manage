@@ -45,7 +45,7 @@ const SafeToSpendCard = ({ safeToSpendData }) => {
             style={{
               background: 'none',
               border: 'none',
-              color: '#818cf8',
+              color: 'var(--accent, #6366f1)',
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -62,22 +62,22 @@ const SafeToSpendCard = ({ safeToSpendData }) => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: 'var(--surface-glass, rgba(15, 23, 42, 0.6))', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))' }}>
           <div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
               <FaReceipt size={10} color="#f59e0b" /> Bills
             </span>
             <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary, #f8fafc)' }}>{formatAmount(upcoming_bills)}</strong>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
               <FaPiggyBank size={10} color="#3b82f6" /> Savings
             </span>
             <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary, #f8fafc)' }}>{formatAmount(planned_savings)}</strong>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
               <FaCalendarDay size={10} color="#10b981" /> Fund
             </span>
-            <strong style={{ fontSize: '0.9rem', color: '#10b981' }}>{formatAmount(remaining_discretionary)}</strong>
+            <strong style={{ fontSize: '0.9rem', color: 'var(--success-text, #10b981)' }}>{formatAmount(remaining_discretionary)}</strong>
           </div>
         </div>
       </div>

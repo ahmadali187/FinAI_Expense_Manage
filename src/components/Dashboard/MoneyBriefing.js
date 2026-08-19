@@ -39,8 +39,6 @@ const MoneyBriefing = ({ dashboardData }) => {
     <div
       className="glass-card"
       style={{
-        background: 'rgba(15, 23, 42, 0.85)',
-        border: '1px solid rgba(99, 102, 241, 0.3)',
         borderRadius: '16px',
         padding: '24px'
       }}
@@ -49,15 +47,15 @@ const MoneyBriefing = ({ dashboardData }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FaSun size={24} color="#fbbf24" />
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: '#ffffff' }}>
+            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>
               {greeting}, {loggedInUser?.name || 'User'}!
             </h2>
-            <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>TODAY'S MONEY BRIEFING & AI ADVISORY</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #94a3b8)', fontWeight: 700 }}>TODAY'S MONEY BRIEFING & AI ADVISORY</span>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.8rem', padding: '6px 12px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.4)', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', padding: '6px 12px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.15)', color: 'var(--accent, #818cf8)', border: '1px solid rgba(99, 102, 241, 0.3)', fontWeight: 700 }}>
             Health Index: {health.score || 85}/100
           </span>
         </div>
@@ -65,31 +63,31 @@ const MoneyBriefing = ({ dashboardData }) => {
 
       {/* 8 Core Answers Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
-        <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block' }}>1. Available Balance</span>
-          <strong style={{ fontSize: '1.2rem', color: currentBalance >= 0 ? '#10b981' : '#ef4444' }}>{formatAmount(currentBalance)}</strong>
+        <div style={{ background: 'var(--surface-glass, rgba(30, 41, 59, 0.6))', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255,255,255,0.08))' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', display: 'block', fontWeight: 600 }}>1. Available Balance</span>
+          <strong style={{ fontSize: '1.2rem', color: currentBalance >= 0 ? 'var(--success-text, #10b981)' : 'var(--danger-text, #ef4444)' }}>{formatAmount(currentBalance)}</strong>
         </div>
 
-        <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block' }}>2. Safe to Spend Today</span>
-          <strong style={{ fontSize: '1.2rem', color: '#10b981' }}>{formatAmount(safeDaily)} / day</strong>
+        <div style={{ background: 'var(--surface-glass, rgba(30, 41, 59, 0.6))', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255,255,255,0.08))' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', display: 'block', fontWeight: 600 }}>2. Safe to Spend Today</span>
+          <strong style={{ fontSize: '1.2rem', color: 'var(--success-text, #10b981)' }}>{formatAmount(safeDaily)} / day</strong>
         </div>
 
-        <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block' }}>3. Upcoming Bills</span>
-          <strong style={{ fontSize: '1.2rem', color: '#f59e0b' }}>{formatAmount(totalBillsVal)} ({upcomingBills.length} bills)</strong>
+        <div style={{ background: 'var(--surface-glass, rgba(30, 41, 59, 0.6))', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255,255,255,0.08))' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', display: 'block', fontWeight: 600 }}>3. Upcoming Bills</span>
+          <strong style={{ fontSize: '1.2rem', color: 'var(--warning-text, #f59e0b)' }}>{formatAmount(totalBillsVal)} ({upcomingBills.length} bills)</strong>
         </div>
 
-        <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block' }}>4. Active Goals & Caps</span>
-          <strong style={{ fontSize: '1.2rem', color: '#818cf8' }}>{goals.length} Goals | {budgets.length} Caps</strong>
+        <div style={{ background: 'var(--surface-glass, rgba(30, 41, 59, 0.6))', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255,255,255,0.08))' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', display: 'block', fontWeight: 600 }}>4. Active Goals & Caps</span>
+          <strong style={{ fontSize: '1.2rem', color: 'var(--accent, #818cf8)' }}>{goals.length} Goals | {budgets.length} Caps</strong>
         </div>
       </div>
 
       {/* AI Attention Banner */}
-      <div style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', color: '#c7d2fe' }}>
-        <FaLightbulb color="#fbbf24" size={18} />
-        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{getTodayAttentionItem()}</span>
+      <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-primary, #ffffff)' }}>
+        <FaLightbulb color="#d97706" size={18} />
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary, #ffffff)' }}>{getTodayAttentionItem()}</span>
       </div>
     </div>
   );

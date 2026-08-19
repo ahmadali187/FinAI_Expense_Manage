@@ -159,7 +159,7 @@ const SettingsPage = () => {
                 }}
               >
                 {Object.values(CURRENCIES).map((curr) => (
-                  <option key={curr.code} value={curr.code} style={{ background: '#0f172a', color: '#ffffff' }}>
+                  <option key={curr.code} value={curr.code}>
                     {curr.code} ({curr.symbol}) — {curr.name}
                   </option>
                 ))}
@@ -188,9 +188,9 @@ const SettingsPage = () => {
                   cursor: 'pointer'
                 }}
               >
-                <option value="dark" style={{ background: '#0f172a', color: '#ffffff' }}>🌙 Dark Theme</option>
-                <option value="light" style={{ background: '#0f172a', color: '#ffffff' }}>☀️ Light Theme</option>
-                <option value="system" style={{ background: '#0f172a', color: '#ffffff' }}>💻 System Preference</option>
+                <option value="dark">🌙 Dark Theme</option>
+                <option value="light">☀️ Light Theme</option>
+                <option value="system">💻 System Preference</option>
               </select>
             </div>
 

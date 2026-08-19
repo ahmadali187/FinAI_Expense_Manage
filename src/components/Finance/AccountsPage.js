@@ -218,8 +218,8 @@ const AccountsPage = () => {
         gap: '20px',
         marginBottom: '32px'
       }}>
-        <Card style={{ background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(15, 23, 42, 0.6))' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <Card style={{ background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.15), var(--surface-glass, rgba(15, 23, 42, 0.6)))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent, #818cf8)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             TOTAL LIQUIDITY
           </span>
           <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
@@ -227,8 +227,8 @@ const AccountsPage = () => {
           </h2>
         </Card>
 
-        <Card style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.6))' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <Card style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), var(--surface-glass, rgba(15, 23, 42, 0.6)))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--success-text, #34d399)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             ACTIVE ACCOUNTS
           </span>
           <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
@@ -236,8 +236,8 @@ const AccountsPage = () => {
           </h2>
         </Card>
 
-        <Card style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(15, 23, 42, 0.6))' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <Card style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), var(--surface-glass, rgba(15, 23, 42, 0.6)))' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--warning-text, #fbbf24)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             ARCHIVED ACCOUNTS
           </span>
           <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
@@ -249,7 +249,7 @@ const AccountsPage = () => {
       {/* Account Cards List */}
       {accounts.length === 0 ? (
         <Card style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.15)', color: 'var(--accent, #818cf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
             <FaWallet size={26} />
           </div>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)', margin: '0 0 8px 0' }}>
@@ -258,35 +258,26 @@ const AccountsPage = () => {
           <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.92rem', margin: '0 0 20px 0', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
             Add your bank accounts, cash balances, or UPI wallets to begin tracking transactions accurately.
           </p>
-          <Button variant="primary" icon={FaPlus} onClick={handleOpenAdd}>
-            Create Your First Account
-          </Button>
         </Card>
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '24px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px'
         }}>
           {accounts.map(acc => (
-            <Card
-              key={acc.id}
-              style={{
-                borderLeft: `4px solid ${acc.color || '#4f46e5'}`,
-                opacity: acc.is_archived ? 0.65 : 1
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Card key={acc.id} style={{ opacity: acc.is_archived ? 0.7 : 1 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{
                     width: '42px',
                     height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(15, 23, 42, 0.8)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    background: acc.color || 'var(--accent, #4f46e5)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    color: '#ffffff',
                     fontSize: '18px'
                   }}>
                     {getAccountIcon(acc.type)}
@@ -317,16 +308,16 @@ const AccountsPage = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 paddingTop: '14px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))'
               }}>
-                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748b)' }}>
                   {acc.transaction_count || 0} transactions recorded
                 </span>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={() => handleOpenEdit(acc)}
                     title="Edit Account"
-                    style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '6px' }}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary, #cbd5e1)', cursor: 'pointer', padding: '6px' }}
                   >
                     <FaEdit size={15} />
                   </button>

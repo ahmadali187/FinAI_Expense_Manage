@@ -144,8 +144,8 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
   const inputStyle = {
     width: '100%',
     padding: '10px 14px',
-    background: 'rgba(15, 23, 42, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    background: 'var(--input-bg, rgba(15, 23, 42, 0.6))',
+    border: '1px solid var(--input-border, rgba(255, 255, 255, 0.12))',
     borderRadius: '10px',
     color: 'var(--text-primary, #f8fafc)',
     fontSize: '0.92rem',
