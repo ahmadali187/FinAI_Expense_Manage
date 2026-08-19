@@ -71,6 +71,12 @@ const Dashboard = () => {
     } else {
       fetchBackendDashboard();
     }
+    window.addEventListener('transactionMutated', fetchBackendDashboard);
+    window.addEventListener('accountMutated', fetchBackendDashboard);
+    return () => {
+      window.removeEventListener('transactionMutated', fetchBackendDashboard);
+      window.removeEventListener('accountMutated', fetchBackendDashboard);
+    };
   }, [loggedInUser, navigate, fetchBackendDashboard, transactions]);
 
   const checkAlerts = useCallback(() => {

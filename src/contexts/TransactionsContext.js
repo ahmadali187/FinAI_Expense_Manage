@@ -31,9 +31,11 @@ export const TransactionsProvider = ({ children }) => {
     fetchTransactions();
     window.addEventListener('storage', fetchTransactions);
     window.addEventListener('authChange', fetchTransactions);
+    window.addEventListener('transactionMutated', fetchTransactions);
     return () => {
       window.removeEventListener('storage', fetchTransactions);
       window.removeEventListener('authChange', fetchTransactions);
+      window.removeEventListener('transactionMutated', fetchTransactions);
     };
   }, [fetchTransactions]);
 
@@ -43,6 +45,8 @@ export const TransactionsProvider = ({ children }) => {
     const handleFinancialEvent = (evt) => {
       if (evt && evt.type && (evt.type.startsWith('transaction.') || evt.type.startsWith('dashboard.') || evt.type.startsWith('account.'))) {
         fetchTransactions();
+        window.dispatchEvent(new CustomEvent('transactionMutated'));
+        window.dispatchEvent(new CustomEvent('accountMutated'));
       }
     };
 
@@ -56,6 +60,8 @@ export const TransactionsProvider = ({ children }) => {
     try {
       const newTx = await api.addTransaction(txData);
       fetchTransactions();
+      window.dispatchEvent(new CustomEvent('transactionMutated'));
+      window.dispatchEvent(new CustomEvent('accountMutated'));
       return newTx;
     } catch (err) {
       console.error("Error adding transaction:", err);
@@ -67,6 +73,8 @@ export const TransactionsProvider = ({ children }) => {
     try {
       const updatedTx = await api.updateTransaction(txId, txData);
       fetchTransactions();
+      window.dispatchEvent(new CustomEvent('transactionMutated'));
+      window.dispatchEvent(new CustomEvent('accountMutated'));
       return updatedTx;
     } catch (err) {
       console.error("Error updating transaction:", err);
@@ -78,6 +86,8 @@ export const TransactionsProvider = ({ children }) => {
     try {
       await api.deleteTransaction(txId);
       fetchTransactions();
+      window.dispatchEvent(new CustomEvent('transactionMutated'));
+      window.dispatchEvent(new CustomEvent('accountMutated'));
       return true;
     } catch (err) {
       console.error("Error deleting transaction:", err);

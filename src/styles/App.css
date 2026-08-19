@@ -38,9 +38,9 @@
 [data-theme='light'] {
   --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
   --bg-dark: #f8fafc;
-  --surface-glass: rgba(255, 255, 255, 0.92);
+  --surface-glass: rgba(255, 255, 255, 0.94);
   --surface-glass-hover: rgba(255, 255, 255, 1);
-  --surface-glass-border: rgba(0, 0, 0, 0.12);
+  --surface-glass-border: rgba(0, 0, 0, 0.15);
   --surface-glass-glow: rgba(99, 102, 241, 0.08);
   --text-primary: #0f172a;
   --text-secondary: #334155;
@@ -48,7 +48,19 @@
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
-[data-theme='light'] body,
+[data-theme='light'] body {
+  background: var(--bg-gradient);
+  color: #0f172a;
+}
+
+[data-theme='light'] .glass-card,
+[data-theme='light'] .custom-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
 [data-theme='light'] h1,
 [data-theme='light'] h2,
 [data-theme='light'] h3,
@@ -57,18 +69,16 @@
 [data-theme='light'] h6,
 [data-theme='light'] label,
 [data-theme='light'] p,
-[data-theme='light'] span:not(.badge-text),
-[data-theme='light'] td,
-[data-theme='light'] th {
-  color: var(--text-primary);
+[data-theme='light'] span:not(.badge-text) {
+  color: inherit;
 }
 
 [data-theme='light'] .custom-input,
 [data-theme='light'] select,
 [data-theme='light'] input:not([type='submit']) {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Global Reset */

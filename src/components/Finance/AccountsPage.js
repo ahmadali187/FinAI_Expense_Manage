@@ -53,6 +53,12 @@ const AccountsPage = () => {
 
   useEffect(() => {
     fetchAccounts();
+    window.addEventListener('transactionMutated', fetchAccounts);
+    window.addEventListener('accountMutated', fetchAccounts);
+    return () => {
+      window.removeEventListener('transactionMutated', fetchAccounts);
+      window.removeEventListener('accountMutated', fetchAccounts);
+    };
   }, [fetchAccounts]);
 
   const resetForm = () => {
@@ -216,7 +222,7 @@ const AccountsPage = () => {
           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             TOTAL LIQUIDITY
           </span>
-          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
             {formatAmount(totalLiquidity)}
           </h2>
         </Card>
@@ -225,7 +231,7 @@ const AccountsPage = () => {
           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             ACTIVE ACCOUNTS
           </span>
-          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
             {activeAccounts.length}
           </h2>
         </Card>
@@ -234,7 +240,7 @@ const AccountsPage = () => {
           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             ARCHIVED ACCOUNTS
           </span>
-          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: '#ffffff' }}>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '8px 0 0 0', color: 'var(--text-primary, #ffffff)' }}>
             {archivedAccounts.length}
           </h2>
         </Card>
@@ -246,10 +252,10 @@ const AccountsPage = () => {
           <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
             <FaWallet size={26} />
           </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', margin: '0 0 8px 0' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)', margin: '0 0 8px 0' }}>
             No accounts found
           </h3>
-          <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0 0 20px 0', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.92rem', margin: '0 0 20px 0', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
             Add your bank accounts, cash balances, or UPI wallets to begin tracking transactions accurately.
           </p>
           <Button variant="primary" icon={FaPlus} onClick={handleOpenAdd}>
@@ -286,10 +292,10 @@ const AccountsPage = () => {
                     {getAccountIcon(acc.type)}
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>
                       {acc.name}
                     </h3>
-                    <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #94a3b8)' }}>
                       {acc.institution_name ? `${acc.institution_name} • ` : ''}{acc.type} {acc.last_four ? `(•••• ${acc.last_four})` : ''}
                     </span>
                   </div>
@@ -298,10 +304,10 @@ const AccountsPage = () => {
               </div>
 
               <div style={{ margin: '16px 0 20px 0' }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', textTransform: 'uppercase', fontWeight: 600 }}>
                   CURRENT BALANCE
                 </span>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '2px' }}>
                   {formatAmount(acc.current_balance !== undefined ? acc.current_balance : acc.opening_balance)}
                 </div>
               </div>

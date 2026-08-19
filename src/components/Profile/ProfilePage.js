@@ -108,10 +108,10 @@ const ProfilePage = () => {
               {(loggedInUser.name || 'U')[0].toUpperCase()}
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>
                 {loggedInUser.name}
               </h3>
-              <span style={{ fontSize: '0.88rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.88rem', color: 'var(--text-muted, #94a3b8)' }}>
                 {loggedInUser.email}
               </span>
               <div style={{ marginTop: '6px' }}>
@@ -124,17 +124,17 @@ const ProfilePage = () => {
 
           <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
-              <span style={{ color: '#94a3b8' }}>Account Type:</span>
-              <span style={{ color: '#f8fafc', fontWeight: 600 }}>Standard FinAI Consumer</span>
+              <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Account Type:</span>
+              <span style={{ color: 'var(--text-primary, #f8fafc)', fontWeight: 600 }}>Standard FinAI Consumer</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
-              <span style={{ color: '#94a3b8' }}>Email Status:</span>
+              <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Email Status:</span>
               <span style={{ color: '#34d399', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <FaCheckCircle size={12} /> Verified
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
-              <span style={{ color: '#94a3b8' }}>Security Level:</span>
+              <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Security Level:</span>
               <span style={{ color: '#818cf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <FaShieldAlt size={12} /> JWT Encrypted
               </span>

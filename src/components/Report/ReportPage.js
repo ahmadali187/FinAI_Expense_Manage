@@ -84,6 +84,12 @@ const ReportPage = () => {
   useEffect(() => {
     fetchAccountsList();
     generateReport();
+    window.addEventListener('transactionMutated', generateReport);
+    window.addEventListener('accountMutated', fetchAccountsList);
+    return () => {
+      window.removeEventListener('transactionMutated', generateReport);
+      window.removeEventListener('accountMutated', fetchAccountsList);
+    };
   }, [generateReport]);
 
   const handlePresetSelect = (presetKey) => {
@@ -284,7 +290,7 @@ const ReportPage = () => {
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
             TOTAL INCOME
           </span>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '4px' }}>
             {formatAmount(summary.total_income)}
           </div>
         </Card>
@@ -293,7 +299,7 @@ const ReportPage = () => {
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f87171', textTransform: 'uppercase' }}>
             TOTAL EXPENSES
           </span>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '4px' }}>
             {formatAmount(summary.total_expenses)}
           </div>
         </Card>
@@ -302,7 +308,7 @@ const ReportPage = () => {
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: summary.net_cash_flow >= 0 ? '#34d399' : '#f87171', textTransform: 'uppercase' }}>
             NET CASH FLOW
           </span>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '4px' }}>
             {formatAmount(summary.net_cash_flow)}
           </div>
         </Card>
@@ -311,7 +317,7 @@ const ReportPage = () => {
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase' }}>
             SAVINGS RATE
           </span>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '4px' }}>
             {summary.savings_rate || 0}%
           </div>
         </Card>
@@ -320,7 +326,7 @@ const ReportPage = () => {
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase' }}>
             TRANSACTIONS
           </span>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', marginTop: '4px' }}>
             {summary.transaction_count || 0}
           </div>
         </Card>
