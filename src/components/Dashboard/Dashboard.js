@@ -291,9 +291,9 @@ const Dashboard = () => {
                         {t.type}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#f8fafc' }}>{t.category}</td>
-                    <td style={{ padding: '12px', fontSize: '0.85rem', color: '#cbd5e1' }}>{t.description || '-'}</td>
-                    <td style={{ padding: '12px', fontWeight: 700, color: t.type === 'income' ? '#10b981' : '#f8fafc' }}>
+                    <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-primary, #f8fafc)' }}>{t.category}</td>
+                    <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary, #cbd5e1)' }}>{t.description || '-'}</td>
+                    <td style={{ padding: '12px', fontWeight: 700, color: t.type === 'income' ? '#10b981' : 'var(--text-primary, #f8fafc)' }}>
                       {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right' }}>

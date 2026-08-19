@@ -90,7 +90,7 @@ const QuickAddExpenseModal = ({ isOpen, onClose, onAdded }) => {
             <input
               type="text"
               className="glass-input"
-              style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '12px', fontSize: '0.95rem' }}
+              style={{ padding: '12px', fontSize: '0.95rem' }}
               placeholder="e.g. Spent 450 at Starbucks today"
               value={text}
               onChange={e => setText(e.target.value)}
@@ -108,16 +108,16 @@ const QuickAddExpenseModal = ({ isOpen, onClose, onAdded }) => {
             </button>
           </form>
         ) : (
-          <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+          <div style={{ background: 'var(--surface-glass, rgba(15, 23, 42, 0.8))', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
             <div style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 700, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FaCheck /> FinAI Parsed Result ({parsedTx.confidence}% Confidence)
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', color: 'var(--text-secondary, #cbd5e1)', marginBottom: '16px' }}>
               <div><strong>Type:</strong> <span style={{ color: parsedTx.type === 'income' ? '#10b981' : '#ef4444', textTransform: 'capitalize' }}>{parsedTx.type}</span></div>
-              <div><strong>Amount:</strong> <span style={{ color: '#ffffff', fontWeight: 700 }}>₹{parsedTx.amount}</span></div>
-              <div><strong>Category:</strong> <span style={{ color: '#ffffff' }}>{parsedTx.category}</span></div>
-              <div><strong>Date:</strong> <span style={{ color: '#ffffff' }}>{parsedTx.date}</span></div>
+              <div><strong>Amount:</strong> <span style={{ color: 'var(--text-primary, #ffffff)', fontWeight: 700 }}>₹{parsedTx.amount}</span></div>
+              <div><strong>Category:</strong> <span style={{ color: 'var(--text-primary, #ffffff)' }}>{parsedTx.category}</span></div>
+              <div><strong>Date:</strong> <span style={{ color: 'var(--text-primary, #ffffff)' }}>{parsedTx.date}</span></div>
             </div>
 
             <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '16px' }}>

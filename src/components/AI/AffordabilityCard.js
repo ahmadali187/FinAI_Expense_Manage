@@ -127,26 +127,26 @@ const AffordabilityCard = () => {
             )}
           </div>
 
-          <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1' }}>
+          <div style={{ background: 'var(--surface-glass, rgba(15, 23, 42, 0.9))', padding: '14px', borderRadius: '12px', border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary, #cbd5e1)' }}>
               <span>Current Account Balance</span>
-              <span style={{ color: '#ffffff', fontWeight: 700 }}>{formatAmount(result.current_balance || 0)}</span>
+              <span style={{ color: 'var(--text-primary, #ffffff)', fontWeight: 700 }}>{formatAmount(result.current_balance || 0)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted, #94a3b8)' }}>
               <span>Upcoming Bills / Commitments</span>
               <span style={{ color: '#f87171', fontWeight: 700 }}>-{formatAmount(result.upcoming_commitments || 0)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted, #94a3b8)' }}>
               <span>Savings Targets Buffer</span>
               <span style={{ color: '#fbbf24', fontWeight: 700 }}>-{formatAmount(result.savings_commitments || 0)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '8px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))', paddingTop: '8px', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>
               <span>Available Discretionary</span>
               <span style={{ color: '#818cf8' }}>{formatAmount(result.estimated_available_amount || 0)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#ffffff', paddingTop: '4px', fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: 'var(--text-primary, #ffffff)', paddingTop: '4px', fontSize: '0.9rem' }}>
               <span>Purchase Amount</span>
-              <span style={{ color: '#ffffff' }}>{formatAmount(result.purchase_amount || 0)}</span>
+              <span style={{ color: 'var(--text-primary, #ffffff)' }}>{formatAmount(result.purchase_amount || 0)}</span>
             </div>
           </div>
         </div>

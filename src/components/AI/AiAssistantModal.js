@@ -125,9 +125,9 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
                   maxWidth: '85%',
                   padding: '12px 16px',
                   borderRadius: m.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.sender === 'user' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(30, 41, 59, 0.85)',
-                  border: m.sender === 'user' ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#ffffff',
+                  background: m.sender === 'user' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'var(--surface-glass, rgba(30, 41, 59, 0.85))',
+                  border: m.sender === 'user' ? 'none' : '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))',
+                  color: m.sender === 'user' ? '#ffffff' : 'var(--text-primary, #ffffff)',
                   fontSize: '0.88rem',
                   lineHeight: 1.5,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
@@ -159,14 +159,14 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
                     {showBreakdownIdx === idx && (
                       <div style={{
                         marginTop: '8px',
-                        background: 'rgba(15, 23, 42, 0.9)',
+                        background: 'var(--surface-glass, rgba(15, 23, 42, 0.9))',
                         padding: '10px',
                         borderRadius: '8px',
                         border: '1px solid rgba(99, 102, 241, 0.3)',
                         fontSize: '0.75rem',
-                        color: '#cbd5e1'
+                        color: 'var(--text-secondary, #cbd5e1)'
                       }}>
-                        <div><strong style={{ color: '#ffffff' }}>Type:</strong> {m.classification}</div>
+                        <div><strong style={{ color: 'var(--text-primary, #ffffff)' }}>Type:</strong> {m.classification}</div>
                         {m.breakdown && (
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
                             <div>Balance: ₹{m.breakdown.current_balance?.toLocaleString('en-IN')}</div>

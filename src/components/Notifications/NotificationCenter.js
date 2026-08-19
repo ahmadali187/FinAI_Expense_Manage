@@ -209,10 +209,10 @@ const NotificationCenter = () => {
                       {getIcon(n.type)}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', marginBottom: '2px' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)', marginBottom: '2px' }}>
                         {n.title}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.3 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #cbd5e1)', lineHeight: 1.3 }}>
                         {n.message}
                       </div>
                     </div>

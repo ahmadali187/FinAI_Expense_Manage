@@ -104,9 +104,9 @@ const ReceiptScannerModal = ({ isOpen, onClose }) => {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <FaReceipt size={22} color="#818cf8" />
-            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>Production Tesseract OCR Receipt Scanner</h3>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary, #ffffff)' }}>Production Tesseract OCR Receipt Scanner</h3>
           </div>
-          <FaTimes style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={onClose} />
+          <FaTimes style={{ cursor: 'pointer', color: 'var(--text-muted, #94a3b8)' }} onClick={onClose} />
         </div>
 
         <div className="modal-body">
@@ -131,7 +131,7 @@ const ReceiptScannerModal = ({ isOpen, onClose }) => {
               }}
             >
               <FaCloudUploadAlt size={48} color="#818cf8" style={{ marginBottom: '12px' }} />
-              <span style={{ fontWeight: 600, fontSize: '1rem', color: '#ffffff' }}>
+              <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary, #ffffff)' }}>
                 Upload or Drop Receipt Image
               </span>
               <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>

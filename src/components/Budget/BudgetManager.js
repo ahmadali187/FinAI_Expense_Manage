@@ -81,11 +81,11 @@ const BudgetManager = () => {
   };
 
   return (
-    <div className="glass-card" style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+    <div className="glass-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FaChartPie color="#6366f1" size={20} />
-          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>My Spending Budgets</h3>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>My Spending Budgets</h3>
         </div>
         <button
           className="btn-gradient-primary"
@@ -113,17 +113,16 @@ const BudgetManager = () => {
 
       {/* Expandable Inline Input Section */}
       {showAddBudgetModal && (
-        <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.4)', marginBottom: '18px' }}>
+        <div style={{ background: 'var(--surface-glass, rgba(15, 23, 42, 0.8))', padding: '18px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.4)', marginBottom: '18px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h4 style={{ margin: 0, color: '#ffffff', fontSize: '1rem', fontWeight: 700 }}>Set Category Spending Limit</h4>
-            <FaTimes style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={() => setShowAddBudgetModal(false)} />
+            <h4 style={{ margin: 0, color: 'var(--text-primary, #ffffff)', fontSize: '1rem', fontWeight: 700 }}>Set Category Spending Limit</h4>
+            <FaTimes style={{ cursor: 'pointer', color: 'var(--text-muted, #94a3b8)' }} onClick={() => setShowAddBudgetModal(false)} />
           </div>
           <form onSubmit={handleAddBudget} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', alignItems: 'end' }}>
             <div>
-              <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Category</label>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #cbd5e1)', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Category</label>
               <select
                 className="glass-input"
-                style={{ background: '#0f172a', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.2)' }}
                 value={newBudgetCategory}
                 onChange={e => setNewBudgetCategory(e.target.value)}
                 required
@@ -134,11 +133,10 @@ const BudgetManager = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Limit Amount (₹)</label>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #cbd5e1)', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Limit Amount (₹)</label>
               <input
                 type="number"
                 className="glass-input"
-                style={{ background: '#0f172a', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.2)' }}
                 value={newBudgetAmount}
                 onChange={e => setNewBudgetAmount(e.target.value)}
                 placeholder="e.g. 5000"
@@ -148,10 +146,9 @@ const BudgetManager = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Period</label>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #cbd5e1)', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Period</label>
               <select
                 className="glass-input"
-                style={{ background: '#0f172a', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.2)' }}
                 value={newBudgetPeriod}
                 onChange={e => setNewBudgetPeriod(e.target.value)}
               >
@@ -177,7 +174,7 @@ const BudgetManager = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-muted, #94a3b8)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                 <th style={{ padding: '10px 12px' }}>Category</th>
                 <th style={{ padding: '10px 12px' }}>Limit Amount</th>
                 <th style={{ padding: '10px 12px' }}>Period</th>
@@ -187,9 +184,9 @@ const BudgetManager = () => {
             <tbody>
               {budgets.map(budget => (
                 <tr key={budget.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <td style={{ padding: '12px', fontWeight: 600, color: '#f8fafc' }}>{budget.category}</td>
+                  <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-primary, #f8fafc)' }}>{budget.category}</td>
                   <td style={{ padding: '12px', fontWeight: 700, color: '#818cf8' }}>{formatAmount(budget.amount)}</td>
-                  <td style={{ padding: '12px', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                  <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary, #cbd5e1)' }}>
                     {budget.period ? budget.period.charAt(0).toUpperCase() + budget.period.slice(1) : 'Monthly'}
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right' }}>

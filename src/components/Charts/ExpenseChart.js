@@ -33,10 +33,10 @@ const ExpenseChart = () => {
   const monthKeys = Object.keys(monthMap).slice(-6);
 
   return (
-    <div className="glass-card" style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+    <div className="glass-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>Visual Financial Analytics</h3>
-        <div style={{ display: 'flex', gap: '6px', background: 'rgba(15, 23, 42, 0.5)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
+        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>Visual Financial Analytics</h3>
+        <div style={{ display: 'flex', gap: '6px', background: 'var(--surface-glass, rgba(15, 23, 42, 0.5))', padding: '4px', borderRadius: 'var(--radius-md)' }}>
           <button
             onClick={() => setActiveTab('category')}
             style={{
@@ -44,7 +44,7 @@ const ExpenseChart = () => {
               borderRadius: 'var(--radius-sm)',
               border: 'none',
               background: activeTab === 'category' ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' : 'transparent',
-              color: '#ffffff',
+              color: activeTab === 'category' ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer'
@@ -59,7 +59,7 @@ const ExpenseChart = () => {
               borderRadius: 'var(--radius-sm)',
               border: 'none',
               background: activeTab === 'monthly' ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' : 'transparent',
-              color: '#ffffff',
+              color: activeTab === 'monthly' ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer'
@@ -78,11 +78,11 @@ const ExpenseChart = () => {
               const barColor = categoryColors[idx % categoryColors.length];
               return (
                 <div key={cat}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '6px', fontWeight: 600, color: '#f8fafc' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '6px', fontWeight: 600, color: 'var(--text-primary, #f8fafc)' }}>
                     <span>{cat}</span>
                     <span>{formatAmount(val)} ({pct}%)</span>
                   </div>
-                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(128,128,128,0.2)', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: '4px', transition: 'width 0.5s ease' }} />
                   </div>
                 </div>
@@ -90,7 +90,7 @@ const ExpenseChart = () => {
             })}
           </div>
         ) : (
-          <p style={{ textAlign: 'center', color: '#cbd5e1', padding: '24px' }}>No expenses recorded yet.</p>
+          <p style={{ textAlign: 'center', color: 'var(--text-muted, #cbd5e1)', padding: '24px' }}>No expenses recorded yet.</p>
         )
       ) : (
         monthKeys.length > 0 ? (
@@ -98,8 +98,8 @@ const ExpenseChart = () => {
             {monthKeys.map(mKey => {
               const data = monthMap[mKey];
               return (
-                <div key={mKey} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '8px', color: '#ffffff' }}>{mKey}</div>
+                <div key={mKey} style={{ background: 'var(--surface-glass, rgba(255,255,255,0.03))', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '8px', color: 'var(--text-primary, #ffffff)' }}>{mKey}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.8rem' }}>
                     <div style={{ color: '#10b981', fontWeight: 600 }}>Income: {formatAmount(data.income)}</div>
                     <div style={{ color: '#ef4444', fontWeight: 600 }}>Expense: {formatAmount(data.expense)}</div>

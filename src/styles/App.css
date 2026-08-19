@@ -36,16 +36,18 @@
 
 /* Light Theme Overrides */
 [data-theme='light'] {
-  --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
-  --bg-dark: #f8fafc;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  --bg-dark: #ffffff;
   --surface-glass: rgba(255, 255, 255, 0.94);
   --surface-glass-hover: rgba(255, 255, 255, 1);
-  --surface-glass-border: rgba(0, 0, 0, 0.15);
+  --surface-glass-border: rgba(15, 23, 42, 0.12);
   --surface-glass-glow: rgba(99, 102, 241, 0.08);
   --text-primary: #0f172a;
   --text-secondary: #334155;
   --text-muted: #64748b;
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  --text-disabled: #94a3b8;
+  --text-inverse: #ffffff;
+  --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme='light'] body {
@@ -54,10 +56,11 @@
 }
 
 [data-theme='light'] .glass-card,
-[data-theme='light'] .custom-card {
+[data-theme='light'] .custom-card,
+[data-theme='light'] div[class*="Card"] {
   background: rgba(255, 255, 255, 0.95) !important;
   color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -69,8 +72,20 @@
 [data-theme='light'] h6,
 [data-theme='light'] label,
 [data-theme='light'] p,
-[data-theme='light'] span:not(.badge-text) {
+[data-theme='light'] span:not(.badge-text),
+[data-theme='light'] td,
+[data-theme='light'] th {
   color: inherit;
+}
+
+[data-theme='light'] table th {
+  color: #475569 !important;
+  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] table td {
+  color: #0f172a !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 [data-theme='light'] .custom-input,
@@ -78,7 +93,13 @@
 [data-theme='light'] input:not([type='submit']) {
   background: rgba(255, 255, 255, 0.98) !important;
   color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(0, 0, 0, 0.22) !important;
+}
+
+[data-theme='light'] input::placeholder,
+[data-theme='light'] textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
 }
 
 /* Global Reset */

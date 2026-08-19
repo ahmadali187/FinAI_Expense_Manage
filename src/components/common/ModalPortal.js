@@ -70,10 +70,10 @@ const ModalPortal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) =
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(15, 23, 42, 0.95)'
+          borderBottom: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))',
+          background: 'var(--surface-glass, rgba(15, 23, 42, 0.95))'
         }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)', margin: 0 }}>
             {title}
           </h2>
           {onClose && (

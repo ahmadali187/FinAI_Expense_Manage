@@ -55,7 +55,7 @@ const CustomSelect = ({ label, value, onChange, options = [], style = {} }) => {
         }}
       >
         <span style={{ fontWeight: 600, color: 'var(--text-primary, #ffffff)' }}>{selectedLabel}</span>
-        <FaChevronDown style={{ fontSize: '0.75rem', opacity: 0.7, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <FaChevronDown style={{ fontSize: '0.75rem', opacity: 0.7, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: 'var(--text-primary, #ffffff)' }} />
       </button>
 
       {/* Dropdown Options Popup */}
@@ -66,10 +66,10 @@ const CustomSelect = ({ label, value, onChange, options = [], style = {} }) => {
           left: 0,
           right: 0,
           marginTop: '6px',
-          background: 'var(--bg-dark, #0f172a)',
+          background: 'var(--surface-glass-hover, #1e293b)',
           border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.15))',
           borderRadius: '12px',
-          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.5)',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.25)',
           zIndex: 9999,
           maxHeight: '220px',
           overflowY: 'auto',
@@ -98,7 +98,7 @@ const CustomSelect = ({ label, value, onChange, options = [], style = {} }) => {
                   transition: 'background 0.15s ease'
                 }}
               >
-                <span>{optLabel}</span>
+                <span style={{ color: isSelected ? '#818cf8' : 'var(--text-primary, #ffffff)' }}>{optLabel}</span>
                 {isSelected && <FaCheck size={12} color="#818cf8" />}
               </div>
             );

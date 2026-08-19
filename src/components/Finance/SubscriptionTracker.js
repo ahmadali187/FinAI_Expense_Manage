@@ -74,13 +74,13 @@ const SubscriptionTracker = () => {
   const totalMonthlySub = subscriptions.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0);
 
   return (
-    <div className="glass-card" style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255, 255, 255, 0.15)', marginTop: '24px' }}>
+    <div className="glass-card" style={{ marginTop: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FaCalendarAlt size={20} color="#8b5cf6" />
           <div>
-            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>Recurring Subscriptions & Bills</h3>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Monthly Commitment: <strong>{formatAmount(totalMonthlySub)}</strong></span>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>Recurring Subscriptions & Bills</h3>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)' }}>Total Monthly Commitment: <strong>{formatAmount(totalMonthlySub)}</strong></span>
           </div>
         </div>
         <button
@@ -93,7 +93,7 @@ const SubscriptionTracker = () => {
       </div>
 
       {showAddForm && (
-        <form onSubmit={handleAddSubscription} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '12px', marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+        <form onSubmit={handleAddSubscription} style={{ background: 'var(--surface-glass, rgba(15, 23, 42, 0.8))', padding: '14px', borderRadius: '12px', marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
           <input
             type="text"
             className="glass-input"
@@ -126,15 +126,15 @@ const SubscriptionTracker = () => {
       )}
 
       {loading ? (
-        <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Loading subscriptions...</div>
+        <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.85rem' }}>Loading subscriptions...</div>
       ) : subscriptions.length > 0 ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
           {subscriptions.map(sub => (
             <div
               key={sub.id}
               style={{
-                background: sub.is_paid || sub.isPaid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(15, 23, 42, 0.6)',
-                border: `1px solid ${sub.is_paid || sub.isPaid ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                background: sub.is_paid || sub.isPaid ? 'rgba(16, 185, 129, 0.1)' : 'var(--surface-glass, rgba(15, 23, 42, 0.6))',
+                border: `1px solid ${sub.is_paid || sub.isPaid ? 'rgba(16, 185, 129, 0.3)' : 'var(--surface-glass-border, rgba(255, 255, 255, 0.1))'}`,
                 padding: '12px 14px',
                 borderRadius: '12px',
                 display: 'flex',
@@ -144,10 +144,10 @@ const SubscriptionTracker = () => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.9rem' }}>{sub.title}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.9rem' }}>{sub.title}</span>
                 <button
                   onClick={() => handleDelete(sub.id)}
-                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted, #94a3b8)', cursor: 'pointer', padding: 0 }}
                 >
                   <FaTimes size={12} />
                 </button>
@@ -155,7 +155,7 @@ const SubscriptionTracker = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: '#818cf8' }}>{formatAmount(sub.amount)}</span>
-                <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>{sub.due_date || sub.dueDate}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #cbd5e1)' }}>{sub.due_date || sub.dueDate}</span>
               </div>
 
               <button

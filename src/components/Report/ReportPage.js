@@ -432,10 +432,10 @@ const ReportPage = () => {
                     {tx.type === 'income' ? <FaArrowUp size={16} /> : <FaArrowDown size={16} />}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.95rem' }}>
                       {tx.category || 'General'}
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', marginTop: '2px' }}>
                       {tx.description || 'No description'} • {tx.account_name || 'Account'} • {tx.date}
                     </div>
                   </div>

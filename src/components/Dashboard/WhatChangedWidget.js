@@ -45,23 +45,23 @@ const WhatChangedWidget = ({ transactions = [] }) => {
   const topChange = changes[0];
 
   return (
-    <div className="glass-card" style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255, 255, 255, 0.15)', marginTop: '24px' }}>
+    <div className="glass-card" style={{ marginTop: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
         <FaChartLine color="#818cf8" size={20} />
         <div>
-          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>
+          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>
             WHAT CHANGED? (Month-over-Month Intelligence)
           </h3>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Spending trends compared to last month</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)' }}>Spending trends compared to last month</span>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '14px' }}>
         {changes.slice(0, 4).map((c, idx) => (
-          <div key={idx} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <span style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700 }}>{c.category}</span>
+          <div key={idx} style={{ background: 'var(--surface-glass, rgba(15, 23, 42, 0.6))', padding: '12px', borderRadius: '10px', border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #cbd5e1)', fontWeight: 700 }}>{c.category}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-              <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>{formatAmount(c.current)}</strong>
+              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary, #ffffff)' }}>{formatAmount(c.current)}</strong>
               <span style={{
                 fontSize: '0.75rem',
                 fontWeight: 800,

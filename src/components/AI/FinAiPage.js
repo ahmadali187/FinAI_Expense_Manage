@@ -148,7 +148,7 @@ const FinAiPage = () => {
                   borderRadius: msg.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   background: msg.sender === 'user' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'var(--surface-glass, rgba(15, 23, 42, 0.85))',
                   border: msg.sender === 'user' ? 'none' : '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))',
-                  color: 'var(--text-primary, #ffffff)',
+                  color: msg.sender === 'user' ? '#ffffff' : 'var(--text-primary, #ffffff)',
                   boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
                 }}
               >

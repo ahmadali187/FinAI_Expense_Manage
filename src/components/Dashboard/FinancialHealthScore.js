@@ -55,11 +55,11 @@ const FinancialHealthScore = () => {
   };
 
   return (
-    <div className="glass-card" style={{ background: 'rgba(30, 41, 59, 0.75)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+    <div className="glass-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FaHeartbeat size={20} color={statusColor} />
-          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>FinAI Health Index</h3>
+          <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>FinAI Health Index</h3>
         </div>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '4px 10px', borderRadius: '12px', background: `${statusColor}20`, color: statusColor, border: `1px solid ${statusColor}40` }}>
           {statusText}
@@ -70,7 +70,7 @@ const FinancialHealthScore = () => {
         {/* Score Ring */}
         <div style={{ position: 'relative', width: '110px', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="110" height="110" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="10" />
+            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(128,128,128,0.2)" strokeWidth="10" />
             <circle
               cx="60"
               cy="60"
@@ -85,8 +85,8 @@ const FinancialHealthScore = () => {
             />
           </svg>
           <div style={{ position: 'absolute', textAlign: 'center' }}>
-            <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', display: 'block', lineHeight: 1 }}>{finalScore}</span>
-            <span style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>/ 100</span>
+            <span style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-primary, #ffffff)', display: 'block', lineHeight: 1 }}>{finalScore}</span>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted, #94a3b8)', textTransform: 'uppercase', fontWeight: 700 }}>/ 100</span>
           </div>
         </div>
 
