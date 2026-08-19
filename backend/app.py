@@ -641,10 +641,7 @@ def single_transaction(current_user, tx_id):
     tx.payment_method = data.get('payment_method', tx.payment_method)
     tx.account_id = new_account_id
     if 'date' in data and data['date']:
-        try:
-            tx.date = datetime.datetime.strptime(data['date'].split('T')[0], '%Y-%m-%d')
-        except Exception:
-            pass
+        tx.date = str(data['date']).split('T')[0]
 
     # Apply new balance effect
     if new_account_id:
