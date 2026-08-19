@@ -23,8 +23,8 @@ const NotificationCenter = () => {
       try {
         const [notifsRes, billsRes, goalsRes] = await Promise.allSettled([
           api.getNotifications(),
-          api.getBills(),
-          api.getGoals()
+          api.getSubscriptions(),
+          api.getSavingsGoals()
         ]);
         if (notifsRes.status === 'fulfilled' && Array.isArray(notifsRes.value)) {
           setDbNotifications(notifsRes.value);
