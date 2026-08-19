@@ -55,7 +55,7 @@ export const TransactionsProvider = ({ children }) => {
   const handleAddTransaction = async (txData) => {
     try {
       const newTx = await api.addTransaction(txData);
-      setTransactions(prev => [newTx, ...prev]);
+      fetchTransactions();
       return newTx;
     } catch (err) {
       console.error("Error adding transaction:", err);
@@ -63,10 +63,21 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  const handleUpdateTransaction = async (txId, txData) => {
+    try {
+      const updatedTx = await api.updateTransaction(txId, txData);
+      fetchTransactions();
+      return updatedTx;
+    } catch (err) {
+      console.error("Error updating transaction:", err);
+      return null;
+    }
+  };
+
   const handleDeleteTransaction = async (txId) => {
     try {
       await api.deleteTransaction(txId);
-      setTransactions(prev => prev.filter(t => t.id !== txId));
+      fetchTransactions();
       return true;
     } catch (err) {
       console.error("Error deleting transaction:", err);
@@ -75,7 +86,7 @@ export const TransactionsProvider = ({ children }) => {
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, loading, addTransaction: handleAddTransaction, deleteTransaction: handleDeleteTransaction, refreshTransactions: fetchTransactions }}>
+    <TransactionsContext.Provider value={{ transactions, loading, addTransaction: handleAddTransaction, updateTransaction: handleUpdateTransaction, deleteTransaction: handleDeleteTransaction, refreshTransactions: fetchTransactions }}>
       {children}
     </TransactionsContext.Provider>
   );

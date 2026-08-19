@@ -101,37 +101,38 @@ const FinAiPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
+    <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 160px)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px', flexWrap: 'wrap' }}>
         <div style={{
-          width: '50px',
-          height: '50px',
-          borderRadius: '16px',
+          width: '46px',
+          height: '46px',
+          borderRadius: '14px',
           background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: '#fff',
-          fontSize: '1.5rem',
-          boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)'
+          fontSize: '1.4rem',
+          boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)',
+          flexShrink: 0
         }}>
           <FaRobot />
         </div>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--text-primary, #f8fafc)' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: 'var(--text-primary, #f8fafc)' }}>
             FinAI Assistant & Intelligence Copilot
           </h1>
-          <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted, #94a3b8)', fontSize: '0.92rem' }}>
+          <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted, #94a3b8)', fontSize: '0.88rem' }}>
             Real-time intelligence based strictly on your account balances, cashflow, and spending.
           </p>
         </div>
       </div>
 
       {/* Main Chat Container */}
-      <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+      <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, minHeight: '480px' }}>
         {/* Messages Scroll Area */}
-        <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '55vh' }}>
           {messages.map((msg, idx) => (
             <div
               key={idx}
@@ -142,9 +143,9 @@ const FinAiPage = () => {
             >
               <div
                 style={{
-                  maxWidth: '84%',
-                  padding: '14px 18px',
-                  borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                  maxWidth: '90%',
+                  padding: '12px 16px',
+                  borderRadius: msg.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   background: msg.sender === 'user' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'var(--surface-glass, rgba(15, 23, 42, 0.85))',
                   border: msg.sender === 'user' ? 'none' : '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))',
                   color: 'var(--text-primary, #ffffff)',
@@ -153,10 +154,10 @@ const FinAiPage = () => {
               >
                 {/* Header Tag for AI */}
                 {msg.sender === 'ai' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Badge variant="indigo" style={{ fontSize: '0.7rem' }}>FinAI Copilot</Badge>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <Badge variant="indigo" style={{ fontSize: '0.68rem' }}>FinAI Copilot</Badge>
                     {msg.classification && (
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
                         [{msg.classification}]
                       </span>
                     )}
@@ -164,7 +165,7 @@ const FinAiPage = () => {
                 )}
 
                 {/* Message Body */}
-                <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.55, whiteSpace: 'pre-line' }}>
+                <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
                   {msg.text}
                 </p>
 
@@ -276,8 +277,8 @@ const FinAiPage = () => {
         </div>
 
         {/* Quick Prompts Chips */}
-        <div style={{ padding: '10px 16px', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass, rgba(15, 23, 42, 0.4))', display: 'flex', gap: '8px', overflowX: 'auto', alignItems: 'center' }}>
-          <FaLightbulb color="#f59e0b" style={{ minWidth: '16px', flexShrink: 0 }} />
+        <div style={{ padding: '8px 14px', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass, rgba(15, 23, 42, 0.4))', display: 'flex', gap: '8px', overflowX: 'auto', alignItems: 'center' }}>
+          <FaLightbulb color="#f59e0b" style={{ minWidth: '14px', flexShrink: 0 }} />
           {quickPrompts.map((prompt, pIdx) => (
             <button
               key={pIdx}
@@ -286,9 +287,9 @@ const FinAiPage = () => {
                 background: 'rgba(99, 102, 241, 0.15)',
                 border: '1px solid rgba(99, 102, 241, 0.35)',
                 color: 'var(--text-primary, #818cf8)',
-                padding: '6px 14px',
+                padding: '6px 12px',
                 borderRadius: '9999px',
-                fontSize: '0.78rem',
+                fontSize: '0.75rem',
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
                 fontWeight: 600,
@@ -301,7 +302,7 @@ const FinAiPage = () => {
         </div>
 
         {/* Input Bar */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '10px', padding: '16px', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass, rgba(15, 23, 42, 0.8))' }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '10px', padding: '12px 14px', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass, rgba(15, 23, 42, 0.8))' }}>
           <Input
             value={input}
             onChange={e => setInput(e.target.value)}

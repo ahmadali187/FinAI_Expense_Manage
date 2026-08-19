@@ -7,8 +7,8 @@ const TRANSACTIONS_KEY = 'transactions';
 const BUDGETS_KEY = 'budgets';
 const CATEGORIES_KEY = 'categories';
 
-const DEFAULT_EXPENSE_CATEGORIES = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Health', 'Shopping', 'Other'];
-const DEFAULT_INCOME_CATEGORIES = ['Salary', 'Bonus', 'Gift', 'Investment', 'Other'];
+const DEFAULT_EXPENSE_CATEGORIES = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Health', 'Shopping', 'Housing', 'Education', 'Travel', 'Farming', 'Other'];
+const DEFAULT_INCOME_CATEGORIES = ['Salary', 'Freelance', 'Business', 'Investments', 'Dividends', 'Gift', 'Bonus', 'Refund', 'Other'];
 
 // Helper to normalize emails for case-insensitive matching
 const norm = (email) => (email ? String(email).trim().toLowerCase() : '');

@@ -327,37 +327,66 @@ const ReportPage = () => {
       </div>
 
       {/* Category Breakdown & Insights */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-        gap: '24px',
-        marginBottom: '32px'
-      }}>
-        <Card title="Category Spending Breakdown">
-          {categoriesBreakdown.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
-              No category expense breakdown available for this range.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {categoriesBreakdown.map((cat, idx) => {
-                const percentage = summary.total_expenses > 0 ? Math.round((cat.amount / summary.total_expenses) * 100) : 0;
-                return (
-                  <div key={idx}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.88rem' }}>
-                      <span style={{ fontWeight: 600, color: '#f8fafc' }}>{cat.category}</span>
-                      <span style={{ color: '#cbd5e1', fontWeight: 700 }}>{formatAmount(cat.amount)} ({percentage}%)</span>
-                    </div>
-                    <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min(percentage, 100)}%`, background: 'linear-gradient(90deg, #4f46e5, #9333ea)', borderRadius: '4px' }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
-      </div>
+      {(() => {
+        const expenseCategories = categoriesBreakdown.filter(c => c.type === 'expense' || (!c.type && summary.total_expenses > 0));
+        const incomeCategories = categoriesBreakdown.filter(c => c.type === 'income');
+        return (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: '24px',
+            marginBottom: '32px'
+          }}>
+            {/* Expense Breakdown */}
+            <Card title="Category Expense Breakdown">
+              {expenseCategories.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                  No category expense breakdown available for this range.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {expenseCategories.map((cat, idx) => {
+                    const percentage = summary.total_expenses > 0 ? Math.round((cat.amount / summary.total_expenses) * 100) : 0;
+                    return (
+                      <div key={idx}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.88rem' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary, #f8fafc)' }}>{cat.category}</span>
+                          <span style={{ color: 'var(--text-secondary, #cbd5e1)', fontWeight: 700 }}>{formatAmount(cat.amount)} ({percentage}%)</span>
+                        </div>
+                        <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(percentage, 100)}%`, background: 'linear-gradient(90deg, #ef4444, #f97316)', borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+
+            {/* Income Breakdown */}
+            {incomeCategories.length > 0 && (
+              <Card title="Income Source Breakdown">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {incomeCategories.map((cat, idx) => {
+                    const percentage = summary.total_income > 0 ? Math.round((cat.amount / summary.total_income) * 100) : 0;
+                    return (
+                      <div key={idx}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.88rem' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary, #f8fafc)' }}>{cat.category}</span>
+                          <span style={{ color: '#34d399', fontWeight: 700 }}>{formatAmount(cat.amount)} ({percentage}%)</span>
+                        </div>
+                        <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(percentage, 100)}%`, background: 'linear-gradient(90deg, #10b981, #059669)', borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Transactions List / Cards */}
       <Card title={`Detailed Transactions (${transactionsList.length})`}>

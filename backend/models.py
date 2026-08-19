@@ -48,6 +48,7 @@ class Account(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def to_dict(self):
+        tx_count = Transaction.query.filter_by(account_id=self.id, user_id=self.user_id).count()
         return {
             'id': str(self.id),
             'user_id': self.user_id,
@@ -63,6 +64,7 @@ class Account(db.Model):
             'notes': self.notes,
             'is_active': self.is_active if self.is_active is not None else True,
             'is_archived': bool(self.is_archived),
+            'transaction_count': tx_count,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 

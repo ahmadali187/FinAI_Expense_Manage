@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { FiCheck, FiMinusCircle, FiPlusCircle } from 'react-icons/fi';
 import ModalPortal from '../common/ModalPortal';
+import CustomSelect from '../common/CustomSelect';
+import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { addTransaction, getAccounts } from '../../services/api';
 
 const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTransactionAdded }) => {
+  const categoriesCtx = useContext(CategoriesContext);
+  const expenseCategories = categoriesCtx?.categories?.expense || ['Food', 'Transport', 'Utilities', 'Entertainment', 'Health', 'Shopping', 'Housing', 'Education', 'Travel', 'Farming', 'Other'];
+  const incomeCategories = categoriesCtx?.categories?.income || ['Salary', 'Freelance', 'Business', 'Investments', 'Dividends', 'Gift', 'Bonus', 'Refund', 'Other'];
+
   const [type, setType] = useState(initialType);
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(initialType === 'income' ? 'Salary' : 'Food');
@@ -40,9 +46,6 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
   }, [isOpen, initialType, fetchAccounts]);
 
   if (!isOpen) return null;
-
-  const expenseCategories = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Shopping', 'Health', 'Housing', 'Education', 'Travel', 'Other'];
-  const incomeCategories = ['Salary', 'Freelance', 'Business', 'Investments', 'Dividends', 'Gift', 'Refund', 'Other'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,6 +107,20 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
     boxSizing: 'border-box'
   };
 
+  const accountOptions = accounts.map(acc => ({
+    value: String(acc.id),
+    label: `${acc.name} (${acc.type}) — ₹${acc.current_balance?.toLocaleString('en-IN') || 0}`
+  }));
+
+  const paymentOptions = [
+    { value: 'UPI', label: 'UPI / NetBanking' },
+    { value: 'Debit Card', label: 'Debit Card' },
+    { value: 'Credit Card', label: 'Credit Card' },
+    { value: 'Cash', label: 'Cash' },
+    { value: 'Bank Transfer', label: 'Bank Transfer' },
+    { value: 'Other', label: 'Other' }
+  ];
+
   return (
     <ModalPortal 
       isOpen={isOpen} 
@@ -129,7 +146,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
           type="button"
           onClick={() => {
             setType('expense');
-            setCategory('Food');
+            setCategory(expenseCategories[0] || 'Food');
           }}
           style={{
             flex: 1,
@@ -155,7 +172,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
           type="button"
           onClick={() => {
             setType('income');
-            setCategory('Salary');
+            setCategory(incomeCategories[0] || 'Salary');
           }}
           style={{
             flex: 1,
@@ -206,45 +223,21 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-          {/* Category */}
-          <div>
-            <label style={labelStyle}>
-              Category *
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={inputStyle}
-            >
-              {(type === 'income' ? incomeCategories : expenseCategories).map((cat) => (
-                <option key={cat} value={cat} style={{ background: '#0f172a', color: '#ffffff' }}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Custom Category Dropdown */}
+          <CustomSelect
+            label="Category *"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            options={type === 'income' ? incomeCategories : expenseCategories}
+          />
 
-          {/* Account */}
-          <div>
-            <label style={labelStyle}>
-              Account / Wallet
-            </label>
-            <select
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              style={inputStyle}
-            >
-              {accounts.length === 0 ? (
-                <option value="" style={{ background: '#0f172a', color: '#ffffff' }}>No Accounts Available</option>
-              ) : (
-                accounts.map((acc) => (
-                  <option key={acc.id} value={acc.id} style={{ background: '#0f172a', color: '#ffffff' }}>
-                    {acc.name} ({acc.type}) — ₹{acc.current_balance?.toLocaleString('en-IN') || 0}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
+          {/* Account Dropdown */}
+          <CustomSelect
+            label="Account / Wallet"
+            value={String(accountId)}
+            onChange={(e) => setAccountId(e.target.value)}
+            options={accountOptions.length > 0 ? accountOptions : [{ value: '', label: 'No Accounts Available' }]}
+          />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -263,23 +256,12 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
           </div>
 
           {/* Payment Method */}
-          <div>
-            <label style={labelStyle}>
-              Payment Method
-            </label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              style={inputStyle}
-            >
-              <option value="UPI" style={{ background: '#0f172a', color: '#ffffff' }}>UPI / NetBanking</option>
-              <option value="Debit Card" style={{ background: '#0f172a', color: '#ffffff' }}>Debit Card</option>
-              <option value="Credit Card" style={{ background: '#0f172a', color: '#ffffff' }}>Credit Card</option>
-              <option value="Cash" style={{ background: '#0f172a', color: '#ffffff' }}>Cash</option>
-              <option value="Bank Transfer" style={{ background: '#0f172a', color: '#ffffff' }}>Bank Transfer</option>
-              <option value="Other" style={{ background: '#0f172a', color: '#ffffff' }}>Other</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Payment Method"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            options={paymentOptions}
+          />
         </div>
 
         {/* Description */}
@@ -310,36 +292,41 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
           />
         </div>
 
-        {/* Submit Button */}
-        <div style={{ paddingTop: '6px' }}>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: '12px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+
           <button
             type="submit"
             disabled={loading}
             style={{
-              width: '100%',
-              padding: '12px 18px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.95rem',
-              color: '#ffffff',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
+              flex: 2,
+              padding: '12px',
+              borderRadius: '10px',
               background: type === 'income' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              boxShadow: type === 'income' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : '0 4px 14px rgba(239, 68, 68, 0.4)',
-              transition: 'all 0.2s ease'
+              border: 'none',
+              color: '#ffffff',
+              fontWeight: 800,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: type === 'income' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : '0 4px 14px rgba(239, 68, 68, 0.4)'
             }}
           >
-            {loading ? (
-              'Saving Record...'
-            ) : (
-              <>
-                <FiCheck style={{ width: '18px', height: '18px' }} /> Save {type === 'income' ? 'Income' : 'Expense'}
-              </>
-            )}
+            {loading ? 'Saving Record...' : `✓ Save ${type === 'income' ? 'Income' : 'Expense'}`}
           </button>
         </div>
       </form>
