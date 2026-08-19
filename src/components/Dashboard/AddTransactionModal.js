@@ -165,25 +165,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
   ];
 
   return (
-    <ModalPortal isOpen={isOpen} onClose={onClose}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-primary, #ffffff)' }}>
-          Record Transaction
-        </h2>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#94a3b8',
-            fontSize: '1.4rem',
-            cursor: 'pointer',
-            padding: '4px'
-          }}
-        >
-          ×
-        </button>
-      </div>
+    <ModalPortal isOpen={isOpen} onClose={onClose} title="Record Transaction">
 
       {error && (
         <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '8px', color: '#f87171', fontSize: '0.85rem', marginBottom: '14px' }}>

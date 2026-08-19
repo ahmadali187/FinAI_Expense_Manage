@@ -12,26 +12,48 @@ const NotificationCenter = () => {
   const { loggedInUser } = useContext(UserContext);
 
   const [dbNotifications, setDbNotifications] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [readIds, setReadIds] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
 
-  const fetchDbNotifications = useCallback(async () => {
+  const fetchAllNotificationData = useCallback(async () => {
     if (loggedInUser) {
       try {
-        const res = await api.getNotifications();
-        setDbNotifications(Array.isArray(res) ? res : []);
+        const [notifsRes, billsRes, goalsRes] = await Promise.allSettled([
+          api.getNotifications(),
+          api.getBills(),
+          api.getGoals()
+        ]);
+        if (notifsRes.status === 'fulfilled' && Array.isArray(notifsRes.value)) {
+          setDbNotifications(notifsRes.value);
+        }
+        if (billsRes.status === 'fulfilled' && Array.isArray(billsRes.value)) {
+          setSubscriptions(billsRes.value);
+        }
+        if (goalsRes.status === 'fulfilled' && Array.isArray(goalsRes.value)) {
+          setGoals(goalsRes.value);
+        }
       } catch (err) {
-        console.error("Failed to fetch notifications:", err);
+        console.error("Failed to fetch notifications data:", err);
       }
     }
   }, [loggedInUser]);
 
   useEffect(() => {
-    fetchDbNotifications();
-  }, [fetchDbNotifications]);
+    fetchAllNotificationData();
+    window.addEventListener('transactionMutated', fetchAllNotificationData);
+    window.addEventListener('budgetMutated', fetchAllNotificationData);
+    window.addEventListener('notificationCreated', fetchAllNotificationData);
+    return () => {
+      window.removeEventListener('transactionMutated', fetchAllNotificationData);
+      window.removeEventListener('budgetMutated', fetchAllNotificationData);
+      window.removeEventListener('notificationCreated', fetchAllNotificationData);
+    };
+  }, [fetchAllNotificationData]);
 
-  const smartNotifs = generateSmartNotifications(transactions, budgets, [], []);
+  const smartNotifs = generateSmartNotifications(transactions, budgets, subscriptions, goals);
   
   const allNotifs = [
     ...dbNotifications.map(n => ({
@@ -60,7 +82,7 @@ const NotificationCenter = () => {
     setReadIds(allNotifs.map(n => n.id));
     try {
       await api.markNotificationsRead();
-      fetchDbNotifications();
+      fetchAllNotificationData();
     } catch (err) {
       console.error("Failed to mark notifications read:", err);
     }
@@ -102,13 +124,14 @@ const NotificationCenter = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          background: 'rgba(30, 41, 59, 0.85)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '12px'
+          background: 'var(--surface-glass, rgba(30, 41, 59, 0.85))',
+          border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.2))',
+          borderRadius: '12px',
+          color: 'var(--text-primary, #ffffff)'
         }}
         title="Notifications & Alerts"
       >
-        <FaBell size={16} color={unreadCount > 0 ? '#fbbf24' : '#cbd5e1'} />
+        <FaBell size={16} color={unreadCount > 0 ? '#f59e0b' : 'var(--text-muted, #cbd5e1)'} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute',
@@ -123,7 +146,7 @@ const NotificationCenter = () => {
             height: '18px',
             display: 'flex',
             alignItems: 'center',
-            justify: 'center',
+            justifyContent: 'center',
             boxShadow: '0 0 10px rgba(239, 68, 68, 0.8)'
           }}>
             {unreadCount}
@@ -138,30 +161,30 @@ const NotificationCenter = () => {
           top: '50px',
           width: '360px',
           maxWidth: '90vw',
-          background: '#0f172a',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          background: 'var(--surface-glass, #0f172a)',
+          border: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.2))',
           borderRadius: '16px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
           zIndex: 9999,
           overflow: 'hidden',
-          color: '#ffffff'
+          color: 'var(--text-primary, #ffffff)'
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.1))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FaBell color="#6366f1" />
-              <strong style={{ fontSize: '1rem', fontWeight: 800 }}>Notification Center</strong>
+              <FaBell color="var(--accent, #6366f1)" />
+              <strong style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary, #ffffff)' }}>Notification Center</strong>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {unreadCount > 0 && (
-                <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: '#818cf8', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>
+                <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: 'var(--accent, #818cf8)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>
                   Mark All Read
                 </button>
               )}
-              <FaTimes style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={() => setIsOpen(false)} />
+              <FaTimes style={{ cursor: 'pointer', color: 'var(--text-muted, #94a3b8)' }} onClick={() => setIsOpen(false)} />
             </div>
           </div>
 
-          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', background: 'rgba(15, 23, 42, 0.5)' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass-hover, rgba(15, 23, 42, 0.5))' }}>
             {['all', 'bills', 'budgets', 'milestones'].map(tab => (
               <button
                 key={tab}
@@ -171,8 +194,8 @@ const NotificationCenter = () => {
                   padding: '8px 4px',
                   background: 'none',
                   border: 'none',
-                  borderBottom: activeTab === tab ? '2px solid #6366f1' : '2px solid transparent',
-                  color: activeTab === tab ? '#ffffff' : '#94a3b8',
+                  borderBottom: activeTab === tab ? '2px solid var(--accent, #6366f1)' : '2px solid transparent',
+                  color: activeTab === tab ? 'var(--text-primary, #ffffff)' : 'var(--text-muted, #94a3b8)',
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   textTransform: 'capitalize',

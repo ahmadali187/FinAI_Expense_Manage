@@ -10,6 +10,8 @@ export const UserProvider = ({ children }) => {
   });
   const [lastUserEmail, setLastUserEmail] = useState(() => localStorage.getItem('lastUserEmail') || '');
 
+  const [loading, setLoading] = useState(true);
+
   const login = async (email, password) => {
     try {
       const res = await api.loginUser(email, password);
@@ -95,7 +97,7 @@ export const UserProvider = ({ children }) => {
       if (token) {
         try {
           const res = await api.getCurrentUser();
-          if (res.user) {
+          if (res && res.user) {
             setLoggedInUser(res.user);
             localStorage.setItem('loggedInUser', JSON.stringify(res.user));
           } else {
@@ -112,13 +114,14 @@ export const UserProvider = ({ children }) => {
       } else {
         setLoggedInUser(null);
       }
+      setLoading(false);
     };
     checkUserSession();
   }, []);
 
 
   return (
-    <UserContext.Provider value={{ loggedInUser, lastUserEmail, login, loginWithGoogle, logout, register, autoGuestLogin, setLastUserEmail }}>
+    <UserContext.Provider value={{ loggedInUser, lastUserEmail, loading, login, loginWithGoogle, logout, register, autoGuestLogin, setLastUserEmail }}>
       {children}
     </UserContext.Provider>
   );

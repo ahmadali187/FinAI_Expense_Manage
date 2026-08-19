@@ -16,6 +16,7 @@ import UserLayout from './components/Layout/UserLayout';
 import AdminLayout from './components/Layout/AdminLayout';
 import SplashScreen from './components/Layout/SplashScreen';
 import NotFound from './components/common/NotFound';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Page Components
 import Login from './components/Auth/Login';
@@ -64,25 +65,27 @@ const Home = () => (
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <UserProvider>
-        <SocketProvider>
-          <TransactionsProvider>
-            <BudgetsProvider>
-              <CategoriesProvider>
-                <CurrencyProvider>
-                  <ThemeProvider>
-                    <Router>
-                      <AppContent />
-                    </Router>
-                  </ThemeProvider>
-                </CurrencyProvider>
-              </CategoriesProvider>
-            </BudgetsProvider>
-          </TransactionsProvider>
-        </SocketProvider>
-      </UserProvider>
-    </GoogleOAuthProvider>
+    <ErrorBoundary>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <UserProvider>
+          <SocketProvider>
+            <TransactionsProvider>
+              <BudgetsProvider>
+                <CategoriesProvider>
+                  <CurrencyProvider>
+                    <ThemeProvider>
+                      <Router>
+                        <AppContent />
+                      </Router>
+                    </ThemeProvider>
+                  </CurrencyProvider>
+                </CategoriesProvider>
+              </BudgetsProvider>
+            </TransactionsProvider>
+          </SocketProvider>
+        </UserProvider>
+      </GoogleOAuthProvider>
+    </ErrorBoundary>
   );
 }
 
