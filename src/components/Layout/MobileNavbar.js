@@ -66,7 +66,7 @@ const MobileNavbar = ({ onOpenQuickAdd }) => {
         <span style={labelStyle}>Accounts</span>
       </NavLink>
 
-      <div style={{ flex: '1 1 0%', minWidth: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: '1 1 0%', minWidth: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', position: 'relative' }}>
         <button
           onClick={onOpenQuickAdd}
           aria-label="Add transaction"
@@ -75,18 +75,19 @@ const MobileNavbar = ({ onOpenQuickAdd }) => {
             border: 'none',
             color: '#ffffff',
             borderRadius: '50%',
-            width: '46px',
-            height: '46px',
+            width: '44px',
+            height: '44px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: '0 4px 14px rgba(99, 102, 241, 0.6)',
-            marginTop: '-16px',
             cursor: 'pointer',
-            flexShrink: 0
+            flexShrink: 0,
+            transform: 'translateY(-10px)',
+            zIndex: 9001
           }}
         >
-          <FaPlus size={20} />
+          <FaPlus size={18} />
         </button>
       </div>
 

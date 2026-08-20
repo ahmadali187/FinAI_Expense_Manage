@@ -7,6 +7,9 @@ const getApiBaseUrl = () => {
   if (envUrl) {
     return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
   }
+  if (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.origin}/api`;
+  }
   return 'http://localhost:5000/api';
 };
 
@@ -143,17 +146,18 @@ export const getAdminBudgets = (params = {}) => {
   return apiRequest(`/admin/budgets${queryStr ? '?' + queryStr : ''}`);
 };
 export const getAdminGlobalSearch = (q) => apiRequest(`/admin/search?q=${encodeURIComponent(q)}`);
-export const getAdminReportDownloadUrl = (reportType) => `${API_BASE_URL}/admin/reports/${reportType}`;
+export const getAdminReportDownloadUrl = (reportType) => `${getApiBaseUrl()}/admin/reports/${reportType}`;
 export const downloadAdminReport = async (reportType) => {
   const headers = {
     ...getAuthHeader()
   };
-  const response = await fetch(`${API_BASE_URL}/admin/reports/${reportType}`, { method: 'GET', headers });
+  const url = `${getApiBaseUrl()}/admin/reports/${reportType}`;
+  const response = await fetch(url, { method: 'GET', headers });
   if (!response.ok) {
-    let errMessage = 'Report download failed';
+    let errMessage = `Report download failed (HTTP ${response.status})`;
     try {
       const errJson = await response.json();
-      errMessage = errJson.message || errMessage;
+      if (errJson && errJson.message) errMessage = errJson.message;
     } catch {
       if (response.status === 401) errMessage = 'Session expired or missing authorization token';
       else if (response.status === 403) errMessage = 'Administrator privileges required';

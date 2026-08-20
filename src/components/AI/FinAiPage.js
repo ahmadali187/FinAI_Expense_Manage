@@ -105,19 +105,21 @@ const FinAiPage = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px', flexWrap: 'wrap' }}>
         <div style={{
-          width: '46px',
-          height: '46px',
-          borderRadius: '14px',
+          width: '52px',
+          height: '52px',
+          minWidth: '52px',
+          minHeight: '52px',
+          borderRadius: '16px',
           background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#fff',
-          fontSize: '1.4rem',
-          boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)',
-          flexShrink: 0
+          color: '#ffffff',
+          boxShadow: '0 8px 20px rgba(99, 102, 241, 0.35)',
+          flexShrink: 0,
+          overflow: 'visible'
         }}>
-          <FaRobot />
+          <FaRobot size={26} />
         </div>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: 'var(--text-primary, #f8fafc)' }}>
