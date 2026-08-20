@@ -98,18 +98,23 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
       setAccountId(accounts[0].id);
     }
 
+    const extractVal = (v) => (v && typeof v === 'object' && v.target && v.target.value !== undefined ? v.target.value : v);
+    const targetAccountId = extractVal(accountId) || (accounts[0] ? accounts[0].id : null);
+    const targetCategory = extractVal(category) || (type === 'income' ? 'Salary' : 'Food');
+    const targetPaymentMethod = extractVal(paymentMethod) || 'UPI';
+
     try {
       setLoading(true);
       setError('');
       await addTransaction({
         type,
         amount: parseFloat(amount),
-        category,
-        account_id: accountId ? parseInt(accountId, 10) : (accounts[0] ? accounts[0].id : null),
+        category: targetCategory,
+        account_id: targetAccountId ? parseInt(targetAccountId, 10) : null,
         date,
-        description: description || (type === 'income' ? `${category} Income` : `${category} Expense`),
+        description: description || (type === 'income' ? `${targetCategory} Income` : `${targetCategory} Expense`),
         merchant: merchant || null,
-        payment_method: paymentMethod
+        payment_method: targetPaymentMethod
       });
 
       setSuccessMsg(`✓ ${type === 'income' ? 'Income' : 'Expense'} recorded successfully!`);
@@ -365,7 +370,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
                 <CustomSelect
                   options={accountOptions}
                   value={accountId}
-                  onChange={setAccountId}
+                  onChange={(val) => setAccountId(val && typeof val === 'object' && val.target ? val.target.value : val)}
                   placeholder="Select Account"
                 />
               </div>
@@ -374,7 +379,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
                 <CustomSelect
                   options={categoryOptions}
                   value={category}
-                  onChange={setCategory}
+                  onChange={(val) => setCategory(val && typeof val === 'object' && val.target ? val.target.value : val)}
                   placeholder="Select Category"
                 />
               </div>
@@ -397,7 +402,7 @@ const AddTransactionModal = ({ isOpen, onClose, initialType = 'expense', onTrans
                 <CustomSelect
                   options={paymentOptions}
                   value={paymentMethod}
-                  onChange={setPaymentMethod}
+                  onChange={(val) => setPaymentMethod(val && typeof val === 'object' && val.target ? val.target.value : val)}
                 />
               </div>
             </div>

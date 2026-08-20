@@ -15,13 +15,32 @@ const CustomSelect = ({ label, value, onChange, options = [], style = {} }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selectedOption = options.find(opt => typeof opt === 'object' ? opt.value === value : opt === value);
+  const unwrapValue = (val) => {
+    if (val && typeof val === 'object' && val.target && val.target.value !== undefined) {
+      return val.target.value;
+    }
+    return val;
+  };
+
+  const rawValue = unwrapValue(value);
+
+  const selectedOption = options.find(opt => {
+    const optVal = typeof opt === 'object' ? opt.value : opt;
+    return String(optVal) === String(rawValue);
+  });
+
   const selectedLabel = selectedOption
     ? (typeof selectedOption === 'object' ? selectedOption.label : selectedOption)
-    : value;
+    : (rawValue || '');
 
   const handleSelect = (val) => {
-    onChange({ target: { value: val } });
+    if (typeof onChange === 'function') {
+      const syntheticEvent = {
+        target: { value: val },
+        value: val
+      };
+      onChange(syntheticEvent);
+    }
     setIsOpen(false);
   };
 

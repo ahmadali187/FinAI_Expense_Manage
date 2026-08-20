@@ -37,12 +37,13 @@ const SettingsPage = () => {
     return (
       <div style={{
         display: 'flex',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '14px 0',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+        padding: '16px 0',
+        borderBottom: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))',
+        gap: '16px'
       }}>
-        <div style={{ paddingRight: '16px' }}>
+        <div style={{ flex: 1, paddingRight: '16px' }}>
           <div style={{ fontWeight: 700, color: 'var(--text-primary, #f8fafc)', fontSize: '0.95rem' }}>{label}</div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)', marginTop: '2px' }}>{description}</div>
         </div>

@@ -143,6 +143,30 @@ export const getAdminBudgets = (params = {}) => {
   return apiRequest(`/admin/budgets${queryStr ? '?' + queryStr : ''}`);
 };
 export const getAdminGlobalSearch = (q) => apiRequest(`/admin/search?q=${encodeURIComponent(q)}`);
-export const getAdminReportDownloadUrl = (reportType) => `${API_BASE_URL}/admin/reports/${reportType}`;
+export const getAdminReportDownloadUrl = (reportType) => {
+  const token = localStorage.getItem('finai_auth_token') || '';
+  return `${API_BASE_URL}/admin/reports/${reportType}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+};
+export const downloadAdminReport = async (reportType) => {
+  const token = localStorage.getItem('finai_auth_token');
+  const headers = {
+    ...getAuthHeader()
+  };
+  const response = await fetch(`${API_BASE_URL}/admin/reports/${reportType}`, { method: 'GET', headers });
+  if (!response.ok) {
+    let errMessage = 'Report download failed';
+    try {
+      const errJson = await response.json();
+      errMessage = errJson.message || errMessage;
+    } catch {
+      if (response.status === 401) errMessage = 'Session expired or missing authorization token';
+      else if (response.status === 403) errMessage = 'Administrator privileges required';
+    }
+    const err = new Error(errMessage);
+    err.status = response.status;
+    throw err;
+  }
+  return await response.blob();
+};
 export const postAdminChangePassword = (current_password, new_password) => apiRequest('/admin/change-password', 'POST', { current_password, new_password });
 export const triggerAdminDbBackup = () => apiRequest('/admin/backup-db', 'POST');

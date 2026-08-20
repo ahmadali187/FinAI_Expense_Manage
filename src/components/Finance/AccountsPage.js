@@ -313,27 +313,63 @@ const AccountsPage = () => {
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748b)' }}>
                   {acc.transaction_count || 0} transactions recorded
                 </span>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                   <button
                     onClick={() => handleOpenEdit(acc)}
                     title="Edit Account"
-                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary, #cbd5e1)', cursor: 'pointer', padding: '6px' }}
+                    style={{
+                      background: 'rgba(99, 102, 241, 0.15)',
+                      border: '1px solid rgba(99, 102, 241, 0.3)',
+                      color: 'var(--accent, #818cf8)',
+                      cursor: 'pointer',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 600
+                    }}
                   >
-                    <FaEdit size={15} />
+                    <FaEdit size={13} /> Edit
                   </button>
                   <button
                     onClick={() => handleArchive(acc)}
                     title={acc.is_archived ? "Restore Account" : "Archive Account"}
-                    style={{ background: 'transparent', border: 'none', color: acc.is_archived ? '#34d399' : '#fbbf24', cursor: 'pointer', padding: '6px' }}
+                    style={{
+                      background: acc.is_archived ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                      border: acc.is_archived ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
+                      color: acc.is_archived ? 'var(--success-text, #34d399)' : 'var(--warning-text, #fbbf24)',
+                      cursor: 'pointer',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 600
+                    }}
                   >
-                    {acc.is_archived ? <FaUndo size={15} /> : <FaArchive size={15} />}
+                    {acc.is_archived ? <><FaUndo size={13} /> Restore</> : <><FaArchive size={13} /> Archive</>}
                   </button>
                   <button
                     onClick={() => handleDeleteClick(acc)}
                     title="Delete Account"
-                    style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '6px' }}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: 'var(--danger-text, #ef4444)',
+                      cursor: 'pointer',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 600
+                    }}
                   >
-                    <FaTrashAlt size={15} />
+                    <FaTrashAlt size={13} />
                   </button>
                 </div>
               </div>

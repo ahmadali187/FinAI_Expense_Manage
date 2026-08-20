@@ -74,10 +74,30 @@ class AdminAccountsAndReportsTestSuite(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.mimetype, 'image/png')
 
+    def test_admin_report_with_query_param_token(self):
+        res = self.client.get(f'/api/admin/reports/financial?token={self.admin_token}')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.mimetype, 'image/png')
+
     def test_admin_matplotlib_user_growth_report(self):
         res = self.client.get('/api/admin/reports/users', headers={'Authorization': f'Bearer {self.admin_token}'})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.mimetype, 'image/png')
+
+    def test_admin_matplotlib_category_spending_report(self):
+        res = self.client.get('/api/admin/reports/transactions', headers={'Authorization': f'Bearer {self.admin_token}'})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.mimetype, 'image/png')
+
+    def test_unauthenticated_admin_report_rejected(self):
+        res = self.client.get('/api/admin/reports/financial')
+        self.assertEqual(res.status_code, 401)
+        data = res.get_json()
+        self.assertEqual(data.get('message'), 'Authorization token is missing')
+
+    def test_non_admin_report_access_rejected(self):
+        res = self.client.get('/api/admin/reports/financial', headers={'Authorization': f'Bearer {self.user_token}'})
+        self.assertEqual(res.status_code, 403)
 
     def test_unauthorized_non_admin_access_rejected(self):
         res = self.client.get('/api/admin/accounts', headers={'Authorization': f'Bearer {self.user_token}'})

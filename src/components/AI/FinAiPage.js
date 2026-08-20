@@ -277,7 +277,20 @@ const FinAiPage = () => {
         </div>
 
         {/* Quick Prompts Chips */}
-        <div style={{ padding: '8px 14px', borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))', background: 'var(--surface-glass, rgba(15, 23, 42, 0.4))', display: 'flex', gap: '8px', overflowX: 'auto', alignItems: 'center' }}>
+        <div
+          className="no-scrollbar"
+          style={{
+            padding: '10px 14px',
+            borderTop: '1px solid var(--surface-glass-border, rgba(255, 255, 255, 0.08))',
+            background: 'var(--surface-glass, rgba(15, 23, 42, 0.4))',
+            display: 'flex',
+            gap: '8px',
+            overflowX: 'auto',
+            alignItems: 'center',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+        >
           <FaLightbulb color="#f59e0b" style={{ minWidth: '14px', flexShrink: 0 }} />
           {quickPrompts.map((prompt, pIdx) => (
             <button
