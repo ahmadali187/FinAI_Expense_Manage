@@ -145,7 +145,6 @@ export const getAdminBudgets = (params = {}) => {
 export const getAdminGlobalSearch = (q) => apiRequest(`/admin/search?q=${encodeURIComponent(q)}`);
 export const getAdminReportDownloadUrl = (reportType) => `${API_BASE_URL}/admin/reports/${reportType}`;
 export const downloadAdminReport = async (reportType) => {
-  const token = localStorage.getItem('finai_auth_token');
   const headers = {
     ...getAuthHeader()
   };
