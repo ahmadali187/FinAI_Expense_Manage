@@ -143,10 +143,7 @@ export const getAdminBudgets = (params = {}) => {
   return apiRequest(`/admin/budgets${queryStr ? '?' + queryStr : ''}`);
 };
 export const getAdminGlobalSearch = (q) => apiRequest(`/admin/search?q=${encodeURIComponent(q)}`);
-export const getAdminReportDownloadUrl = (reportType) => {
-  const token = localStorage.getItem('finai_auth_token') || '';
-  return `${API_BASE_URL}/admin/reports/${reportType}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
-};
+export const getAdminReportDownloadUrl = (reportType) => `${API_BASE_URL}/admin/reports/${reportType}`;
 export const downloadAdminReport = async (reportType) => {
   const token = localStorage.getItem('finai_auth_token');
   const headers = {

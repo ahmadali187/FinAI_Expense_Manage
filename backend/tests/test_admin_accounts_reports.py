@@ -74,10 +74,11 @@ class AdminAccountsAndReportsTestSuite(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.mimetype, 'image/png')
 
-    def test_admin_report_with_query_param_token(self):
+    def test_admin_report_query_token_strictly_rejected(self):
         res = self.client.get(f'/api/admin/reports/financial?token={self.admin_token}')
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.mimetype, 'image/png')
+        self.assertEqual(res.status_code, 401)
+        data = res.get_json()
+        self.assertEqual(data.get('message'), 'Authorization token is missing')
 
     def test_admin_matplotlib_user_growth_report(self):
         res = self.client.get('/api/admin/reports/users', headers={'Authorization': f'Bearer {self.admin_token}'})

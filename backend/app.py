@@ -218,9 +218,6 @@ def token_required(f):
             token = auth_header.split(' ')[1]
 
         if not token:
-            token = request.args.get('token') or request.args.get('auth_token')
-
-        if not token:
             return jsonify({'message': 'Authorization token is missing'}), 401
 
         try:
